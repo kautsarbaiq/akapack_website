@@ -18,7 +18,7 @@ const MAX_RANGE = 1000; // batas baris default Supabase per request
 
 function normalizeProduct(row: Record<string, unknown>): Product {
   return {
-    ...(row as Product),
+    ...(row as unknown as Product),
     units: Array.isArray(row.units) ? (row.units as Product["units"]) : [],
     price_tiers: Array.isArray(row.price_tiers)
       ? (row.price_tiers as Product["price_tiers"])

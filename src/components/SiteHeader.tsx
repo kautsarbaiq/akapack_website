@@ -44,6 +44,14 @@ export function SiteHeader() {
           <CartButton />
         </div>
       </div>
+
+      <nav className="thin-scroll flex gap-5 overflow-x-auto border-t border-line px-4 py-2 text-sm md:hidden">
+        {NAV.map(([label, href]) => (
+          <Link key={href} href={href} className="whitespace-nowrap text-ink-soft hover:text-ink">
+            {label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }

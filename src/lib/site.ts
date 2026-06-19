@@ -23,6 +23,10 @@ export const SITE = {
   ],
 } as const;
 
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
+
 export const WA_PRIMARY = SITE.outlets[0].wa;
 
 export function waLink(phone: string, text?: string): string {
