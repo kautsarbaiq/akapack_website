@@ -8,6 +8,8 @@ export const SITE = {
       address: "Jl. Ibrahim Adjie No. 147, Kiaracondong, Bandung",
       phone: "0821-2101-0050",
       wa: "6282121010050",
+      hours: "Senin–Sabtu · 08.00–17.00",
+      role: "Cabang utama",
     },
     {
       key: "garut",
@@ -15,6 +17,8 @@ export const SITE = {
       address: "Jl. Cimanuk No. 28, Tarogong Kidul, Garut",
       phone: "0821-2104-9478",
       wa: "6282121049478",
+      hours: "Senin–Sabtu · 08.00–17.00",
+      role: "Cabang",
     },
   ],
 } as const;

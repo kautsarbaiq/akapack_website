@@ -114,7 +114,10 @@ export async function POST(req: Request) {
   });
 
   if (oErr) {
-    const isRls = /row-level security|permission|policy|does not exist|relation/i.test(oErr.message);
+    const isRls =
+      /row-level security|permission|policy|does not exist|relation|could not find the table|schema cache/i.test(
+        oErr.message,
+      );
     return NextResponse.json(
       {
         error: isRls
