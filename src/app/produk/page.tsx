@@ -5,9 +5,15 @@ import {
   fetchStockFor,
   type ProductSort,
 } from "@/lib/catalog";
+import {
+  buildCategoryGroups,
+  categoryIdsForGroup,
+  groupLabel,
+  groupSlugFor,
+} from "@/lib/category-groups";
 import { titleCase } from "@/lib/format";
 import { ProductCard } from "@/components/ProductCard";
-import { CategoryBar } from "@/components/CategoryBar";
+import { CategoryNav } from "@/components/CategoryNav";
 import { SearchBar } from "@/components/SearchBar";
 import { SortSelect } from "@/components/SortSelect";
 import { Pagination } from "@/components/Pagination";
@@ -23,6 +29,7 @@ const SORTS: ProductSort[] = ["name", "price_asc", "price_desc"];
 interface SP {
   q?: string;
   kategori?: string;
+  grup?: string;
   sort?: string;
   hal?: string;
 }
@@ -38,15 +45,25 @@ export default async function ProdukPage({
     ? (sp.sort as ProductSort)
     : "name";
   const kategori = sp.kategori || null;
+  const grup = sp.grup || null;
   const q = sp.q || null;
 
-  const [categories, result] = await Promise.all([
-    fetchCategories(),
-    fetchProductsPage({ page, pageSize: PAGE_SIZE, categoryId: kategori, search: q, sort }),
-  ]);
-  const stock = await fetchStockFor(result.products.map((p) => p.id));
+  const categories = await fetchCategories();
+  const groups = buildCategoryGroups(categories);
   const catMap = new Map(categories.map((c) => [c.id, c]));
-  const activeCat = kategori ? catMap.get(kategori) : null;
+  const activeCat = kategori ? (catMap.get(kategori) ?? null) : null;
+  const activeGroup = activeCat ? groupSlugFor(activeCat.name) : grup;
+  const categoryIds = !kategori && grup ? categoryIdsForGroup(categories, grup) : null;
+
+  const result = await fetchProductsPage({
+    page,
+    pageSize: PAGE_SIZE,
+    categoryId: kategori,
+    categoryIds,
+    search: q,
+    sort,
+  });
+  const stock = await fetchStockFor(result.products.map((p) => p.id));
 
   const fmt = new Intl.NumberFormat("id-ID");
 
@@ -62,7 +79,9 @@ export default async function ProdukPage({
             ? `Hasil “${q}”`
             : activeCat
               ? titleCase(activeCat.name)
-              : "Semua produk"}
+              : activeGroup
+                ? groupLabel(activeGroup)
+                : "Semua produk"}
         </h1>
         <p className="font-mono text-xs text-ink-soft">
           {fmt.format(result.total)} produk
@@ -75,9 +94,15 @@ export default async function ProdukPage({
         <SortSelect value={sort} q={q} kategori={kategori} />
       </div>
 
-      {/* Filter kategori */}
+      {/* Filter: grup induk → kategori */}
       <div className="mt-4 border-y border-line py-3">
-        <CategoryBar categories={categories} activeId={kategori} q={q} sort={sort} />
+        <CategoryNav
+          groups={groups}
+          activeGroup={activeGroup}
+          activeCategoryId={kategori}
+          q={q}
+          sort={sort}
+        />
       </div>
 
       {/* Grid */}
@@ -98,7 +123,11 @@ export default async function ProdukPage({
         </div>
       )}
 
-      <Pagination page={result.page} pageCount={result.pageCount} base={{ q, kategori, sort }} />
+      <Pagination
+        page={result.page}
+        pageCount={result.pageCount}
+        base={{ q, kategori, grup, sort }}
+      />
     </div>
   );
 }
