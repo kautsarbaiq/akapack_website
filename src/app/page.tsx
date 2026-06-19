@@ -1,65 +1,123 @@
-import Image from "next/image";
+import Link from "next/link";
+import { fetchCategories } from "@/lib/catalog";
+import { titleCase, monogram } from "@/lib/format";
+import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
 
-export default function Home() {
+export default async function Home() {
+  const categories = await fetchCategories();
+  const featured = categories.slice(0, 10);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      {/* Hero */}
+      <section className="border-b border-line">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.5fr_1fr] lg:py-24">
+          <div>
+            <div className="font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
+              Grosir kemasan &amp; mesin · Bandung — Garut
+            </div>
+            <h1 className="mt-5 font-display text-5xl font-medium leading-[1.02] tracking-tight sm:text-6xl">
+              Semua kebutuhan kemasan usahamu, satu tempat.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
+              Lebih dari 3.900 produk — plastik, kertas, box, hingga mesin pengemas.
+              Harga grosir, stok nyata dari dua cabang.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/produk"
+                className="bg-indigo px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              >
+                Lihat katalog
+              </Link>
+              <a
+                href={waLink(WA_PRIMARY, "Halo Akapack, saya mau tanya produk.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-ink px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+              >
+                Pesan via WhatsApp
+              </a>
+            </div>
+          </div>
+
+          {/* Spec sheet ala katalog */}
+          <div className="self-end border border-line bg-card">
+            {[
+              ["Produk", "3.900+"],
+              ["Kategori", "109"],
+              ["Cabang", "Bandung & Garut"],
+              ["Pembayaran", "Transfer · COD"],
+            ].map(([k, v], i) => (
+              <div
+                key={k}
+                className={
+                  "flex items-baseline justify-between px-5 py-4" +
+                  (i > 0 ? " border-t border-line" : "")
+                }
+              >
+                <span className="font-mono text-xs uppercase tracking-[0.1em] text-ink-soft">
+                  {k}
+                </span>
+                <span className="font-display text-xl font-medium">{v}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Kategori unggulan */}
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="flex items-end justify-between">
+          <h2 className="font-display text-2xl font-medium tracking-tight">Jelajahi kategori</h2>
+          <Link href="/produk" className="font-mono text-xs text-indigo-ink hover:underline">
+            Semua kategori →
+          </Link>
         </div>
-      </main>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {featured.map((c) => (
+            <Link
+              key={c.id}
+              href={`/produk?kategori=${c.id}`}
+              className="group relative flex aspect-square flex-col justify-between overflow-hidden p-3 text-white transition-transform hover:-translate-y-0.5"
+              style={{ backgroundColor: c.color || "#4f46e5" }}
+            >
+              <span className="font-mono text-[64px] font-medium leading-none text-white/30">
+                {monogram(c.name)}
+              </span>
+              <span className="font-mono text-xs uppercase tracking-[0.08em]">
+                {titleCase(c.name)}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Cabang */}
+      <section className="border-t border-line bg-paper-2">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <h2 className="font-display text-2xl font-medium tracking-tight">Dua cabang, stok nyata</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {SITE.outlets.map((o) => (
+              <div key={o.key} className="border border-line bg-card p-6">
+                <div className="font-mono text-xs uppercase tracking-[0.12em] text-ink-soft">
+                  {o.key === "bandung" ? "Cabang utama" : "Cabang"}
+                </div>
+                <h3 className="mt-2 font-display text-xl font-medium">{o.name}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{o.address}</p>
+                <a
+                  href={waLink(o.wa, `Halo ${o.name}, saya mau tanya stok.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-paper"
+                >
+                  WhatsApp {o.phone}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
