@@ -32,6 +32,8 @@ export interface ProductQuery {
   page?: number;
   pageSize?: number;
   categoryId?: string | null;
+  /** Filter ke banyak kategori sekaligus (mis. semua kategori dalam satu grup). */
+  categoryIds?: string[] | null;
   search?: string | null;
   sort?: ProductSort;
 }
@@ -44,9 +46,15 @@ export async function fetchProductsPage(
     page = 1,
     pageSize = PAGE_SIZE,
     categoryId = null,
+    categoryIds = null,
     search = null,
     sort = "name",
   } = query;
+
+  // Grup tanpa kategori → langsung kosong (hindari .in() dengan list kosong).
+  if (categoryIds && categoryIds.length === 0) {
+    return { products: [], total: 0, page, pageSize, pageCount: 1 };
+  }
 
   const supabase = getSupabase();
   let q = supabase
@@ -55,6 +63,7 @@ export async function fetchProductsPage(
     .eq("is_active", true);
 
   if (categoryId) q = q.eq("category_id", categoryId);
+  else if (categoryIds && categoryIds.length > 0) q = q.in("category_id", categoryIds);
   if (search && search.trim()) {
     const term = search.trim();
     // cari di nama / sku / barcode
