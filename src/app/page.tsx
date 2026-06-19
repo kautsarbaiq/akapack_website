@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { fetchCategories } from "@/lib/catalog";
-import { titleCase, monogram } from "@/lib/format";
+import { buildCategoryGroups } from "@/lib/category-groups";
+import { monogram } from "@/lib/format";
 import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
 
 export default async function Home() {
   const categories = await fetchCategories();
-  const featured = categories.slice(0, 10);
+  const groups = buildCategoryGroups(categories);
 
   return (
     <div>
@@ -75,19 +76,17 @@ export default async function Home() {
           </Link>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {featured.map((c) => (
+          {groups.map((g) => (
             <Link
-              key={c.id}
-              href={`/produk?kategori=${c.id}`}
+              key={g.slug}
+              href={`/produk?grup=${g.slug}`}
               className="group relative flex aspect-square flex-col justify-between overflow-hidden p-3 text-white transition-transform hover:-translate-y-0.5"
-              style={{ backgroundColor: c.color || "#4f46e5" }}
+              style={{ backgroundColor: g.categories[0]?.color || "#4f46e5" }}
             >
               <span className="font-mono text-[64px] font-medium leading-none text-white/30">
-                {monogram(c.name)}
+                {monogram(g.label)}
               </span>
-              <span className="font-mono text-xs uppercase tracking-[0.08em]">
-                {titleCase(c.name)}
-              </span>
+              <span className="font-mono text-xs uppercase tracking-[0.08em]">{g.label}</span>
             </Link>
           ))}
         </div>
