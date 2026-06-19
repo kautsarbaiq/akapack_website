@@ -7,10 +7,11 @@ import { catalogHref } from "@/lib/catalog-url";
 interface Props {
   initial: string | null;
   kategori: string | null;
+  grup?: string | null;
   sort: string | null;
 }
 
-export function SearchBar({ initial, kategori, sort }: Props) {
+export function SearchBar({ initial, kategori, grup = null, sort }: Props) {
   const [value, setValue] = useState(initial ?? "");
   const router = useRouter();
 
@@ -18,7 +19,7 @@ export function SearchBar({ initial, kategori, sort }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        router.push(catalogHref({ q: value.trim() || null, kategori, sort }));
+        router.push(catalogHref({ q: value.trim() || null, kategori, grup, sort }));
       }}
       className="flex w-full items-center border border-line bg-card focus-within:border-ink/40 sm:w-80"
       role="search"
@@ -39,7 +40,7 @@ export function SearchBar({ initial, kategori, sort }: Props) {
           type="button"
           onClick={() => {
             setValue("");
-            router.push(catalogHref({ kategori, sort }));
+            router.push(catalogHref({ kategori, grup, sort }));
           }}
           aria-label="Bersihkan"
           className="px-2 text-ink-soft hover:text-ink"

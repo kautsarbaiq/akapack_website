@@ -90,7 +90,7 @@ export default async function ProdukPage({
 
       {/* Toolbar */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchBar initial={q} kategori={kategori} sort={sort} />
+        <SearchBar initial={q} kategori={kategori} grup={grup} sort={sort} />
         <SortSelect value={sort} q={q} kategori={kategori} grup={grup} />
       </div>
 
