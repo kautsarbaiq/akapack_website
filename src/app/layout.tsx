@@ -5,6 +5,7 @@ import { CartProvider } from "@/lib/cart";
 import { SITE_URL } from "@/lib/site";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteJsonLd } from "@/components/SiteJsonLd";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({
@@ -20,35 +21,40 @@ const jbmono = JetBrains_Mono({
   display: "swap",
 });
 
+const TITLE_DEFAULT = "Grosir Kemasan Plastik & Mesin Bandung–Garut | Akapack";
 const DESCRIPTION =
-  "Pusat grosir kemasan plastik, kertas, dan mesin pengemas di Bandung & Garut. 3.900+ produk, harga grosir, stok nyata dari 2 cabang.";
+  "Grosir kemasan plastik, kertas, box & mesin pengemas di Bandung & Garut. 3.900+ produk harga grosir, stok nyata dari 2 cabang. Pesan via WhatsApp.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Akapack — Grosir Kemasan Plastik & Mesin",
+    default: TITLE_DEFAULT,
     template: "%s · Akapack",
   },
   description: DESCRIPTION,
+  alternates: { canonical: "/" },
   keywords: [
     "grosir kemasan",
+    "grosir kemasan bandung",
+    "grosir kemasan garut",
     "kemasan plastik bandung",
-    "grosir plastik",
+    "grosir plastik garut",
     "mesin pengemas",
-    "kemasan garut",
+    "cup plastik grosir",
+    "paper bag grosir",
     "akapack",
   ],
   openGraph: {
     type: "website",
     locale: "id_ID",
     siteName: "Akapack",
-    title: "Akapack — Grosir Kemasan Plastik & Mesin",
+    title: TITLE_DEFAULT,
     description: DESCRIPTION,
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Akapack — Grosir Kemasan Plastik & Mesin",
+    title: TITLE_DEFAULT,
     description: DESCRIPTION,
   },
 };
@@ -60,6 +66,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${inter.variable} ${grotesk.variable} ${jbmono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
+        <SiteJsonLd />
         <CartProvider>
           <SiteHeader />
           <main className="flex-1">{children}</main>
