@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Category, Product, ProductStock } from "@/lib/types";
 import { displayPrice, formatRupiah, monogram, titleCase } from "@/lib/format";
 import { AddToCartButton } from "@/components/AddToCartButton";
@@ -32,12 +33,12 @@ export function ProductCard({ product, category, stock }: Props) {
       <Link href={href} className="block">
         <div className="relative aspect-[4/3] overflow-hidden">
           {product.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={product.image_url}
-              alt={product.name}
-              className="h-full w-full object-cover"
-              loading="lazy"
+              alt={`${product.name}${category ? " — " + titleCase(category.name) : ""} · grosir kemasan Akapack`}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover"
             />
           ) : (
             <div className="absolute inset-0" style={{ backgroundColor: color }}>
