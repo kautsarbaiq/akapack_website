@@ -1,12 +1,43 @@
 import Link from "next/link";
-import { fetchCategories } from "@/lib/catalog";
-import { buildCategoryGroups } from "@/lib/category-groups";
+import {
+  fetchCategories,
+  fetchCategoryCounts,
+  fetchProductsPage,
+  fetchStockFor,
+} from "@/lib/catalog";
+import { buildCategoryGroups, countByGroup } from "@/lib/category-groups";
 import { monogram } from "@/lib/format";
 import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
+import { ProductCard } from "@/components/ProductCard";
+import { HowToBuy } from "@/components/HowToBuy";
+import { CtaBand } from "@/components/CtaBand";
+import { BranchCard } from "@/components/BranchCard";
+
+const FEATURES: [string, string][] = [
+  ["Harga grosir", "Harga langsung untuk pembelian banyak — tanpa nego panjang."],
+  ["Stok nyata 2 cabang", "Jumlah stok Bandung & Garut tampil apa adanya, sinkron dengan kasir."],
+  ["Katalog lengkap", "Plastik, kertas, box, mika, sampai mesin pengemas dalam satu tempat."],
+  ["Mesin & konsultasi", "Bukan cuma kemasan — kami bantu pilih mesin yang pas via WhatsApp."],
+];
 
 export default async function Home() {
-  const categories = await fetchCategories();
+  const [categories, { byCategory, total }, featured] = await Promise.all([
+    fetchCategories(),
+    fetchCategoryCounts(),
+    fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
+  ]);
   const groups = buildCategoryGroups(categories);
+  const groupCounts = countByGroup(categories, byCategory);
+
+  // Etalase: utamakan produk berfoto, lengkapi dengan sisanya.
+  const pool = featured.products;
+  const showcase = [
+    ...pool.filter((p) => p.image_url),
+    ...pool.filter((p) => !p.image_url),
+  ].slice(0, 8);
+  const stock = await fetchStockFor(showcase.map((p) => p.id));
+  const catMap = new Map(categories.map((c) => [c.id, c]));
+  const fmt = new Intl.NumberFormat("id-ID");
 
   return (
     <div>
@@ -21,8 +52,8 @@ export default async function Home() {
               Semua kebutuhan kemasan usahamu, satu tempat.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-              Lebih dari 3.900 produk — plastik, kertas, box, hingga mesin pengemas.
-              Harga grosir, stok nyata dari dua cabang.
+              Lebih dari {fmt.format(total)} produk — plastik, kertas, box, hingga mesin
+              pengemas. Harga grosir, stok nyata dari dua cabang.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -45,8 +76,8 @@ export default async function Home() {
           {/* Spec sheet ala katalog */}
           <div className="self-end border border-line bg-card">
             {[
-              ["Produk", "3.900+"],
-              ["Kategori", "109"],
+              ["Produk", fmt.format(total)],
+              ["Kategori", String(categories.length)],
               ["Cabang", "Bandung & Garut"],
               ["Pembayaran", "Transfer · COD"],
             ].map(([k, v], i) => (
@@ -61,6 +92,23 @@ export default async function Home() {
                   {k}
                 </span>
                 <span className="font-display text-xl font-medium">{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Keunggulan */}
+      <section className="border-b border-line bg-paper-2">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map(([t, b], i) => (
+              <div key={t} className="bg-card p-6">
+                <div className="font-mono text-xs text-ink-soft">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <h3 className="mt-3 font-display text-lg font-medium">{t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{b}</p>
               </div>
             ))}
           </div>
@@ -86,37 +134,67 @@ export default async function Home() {
               <span className="font-mono text-[64px] font-medium leading-none text-white/30">
                 {monogram(g.label)}
               </span>
-              <span className="font-mono text-xs uppercase tracking-[0.08em]">{g.label}</span>
+              <span>
+                <span className="block font-mono text-xs uppercase tracking-[0.08em]">
+                  {g.label}
+                </span>
+                <span className="mt-0.5 block font-mono text-[11px] text-white/70">
+                  {fmt.format(groupCounts.get(g.slug) ?? 0)} produk
+                </span>
+              </span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Cabang */}
+      {/* Etalase produk */}
       <section className="border-t border-line bg-paper-2">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 className="font-display text-2xl font-medium tracking-tight">Dua cabang, stok nyata</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {SITE.outlets.map((o) => (
-              <div key={o.key} className="border border-line bg-card p-6">
-                <div className="font-mono text-xs uppercase tracking-[0.12em] text-ink-soft">
-                  {o.key === "bandung" ? "Cabang utama" : "Cabang"}
-                </div>
-                <h3 className="mt-2 font-display text-xl font-medium">{o.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{o.address}</p>
-                <a
-                  href={waLink(o.wa, `Halo ${o.name}, saya mau tanya stok.`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-block border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-paper"
-                >
-                  WhatsApp {o.phone}
-                </a>
-              </div>
+          <div className="flex items-end justify-between">
+            <h2 className="font-display text-2xl font-medium tracking-tight">Cuplikan katalog</h2>
+            <Link href="/produk" className="font-mono text-xs text-indigo-ink hover:underline">
+              Lihat semua →
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {showcase.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                category={p.category_id ? catMap.get(p.category_id) : null}
+                stock={stock[p.id]}
+              />
             ))}
           </div>
         </div>
       </section>
+
+      {/* Cara belanja */}
+      <div className="border-t border-line">
+        <HowToBuy />
+      </div>
+
+      {/* Cabang */}
+      <section className="border-t border-line bg-paper-2">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="flex items-end justify-between">
+            <h2 className="font-display text-2xl font-medium tracking-tight">
+              Dua cabang, stok nyata
+            </h2>
+            <Link href="/cabang" className="font-mono text-xs text-indigo-ink hover:underline">
+              Detail &amp; peta →
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {SITE.outlets.map((o) => (
+              <BranchCard key={o.key} outlet={o} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <CtaBand />
     </div>
   );
 }
