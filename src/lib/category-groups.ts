@@ -64,6 +64,19 @@ export function categoryIdsForGroup(categories: Category[], slug: string): strin
   return categories.filter((c) => groupSlugFor(c.name) === slug).map((c) => c.id);
 }
 
+/** Total produk per grup induk, dari hitungan per-kategori (lihat fetchCategoryCounts). */
+export function countByGroup(
+  categories: Category[],
+  byCategory: Map<string, number>,
+): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const c of categories) {
+    const slug = groupSlugFor(c.name);
+    out.set(slug, (out.get(slug) ?? 0) + (byCategory.get(c.id) ?? 0));
+  }
+  return out;
+}
+
 export function groupLabel(slug: string): string {
   return (
     CATEGORY_GROUPS.find((g) => g.slug === slug)?.label ??

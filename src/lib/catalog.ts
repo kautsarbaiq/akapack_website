@@ -137,6 +137,38 @@ export async function fetchCategories(): Promise<Category[]> {
   return (data ?? []) as Category[];
 }
 
+/**
+ * Hitung jumlah produk aktif per kategori (hanya kolom category_id, dipaginasi).
+ * Dipakai untuk badge jumlah di beranda & halaman Tentang. Mengembalikan juga total.
+ */
+export async function fetchCategoryCounts(): Promise<{
+  byCategory: Map<string, number>;
+  total: number;
+}> {
+  const supabase = getSupabase();
+  const byCategory = new Map<string, number>();
+  let total = 0;
+  let from = 0;
+
+  for (;;) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("category_id")
+      .eq("is_active", true)
+      .range(from, from + MAX_RANGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    for (const row of data) {
+      total += 1;
+      const id = row.category_id as string | null;
+      if (id) byCategory.set(id, (byCategory.get(id) ?? 0) + 1);
+    }
+    if (data.length < MAX_RANGE) break;
+    from += MAX_RANGE;
+  }
+  return { byCategory, total };
+}
+
 /** Stok per cabang untuk sekumpulan produk → map productId -> {bandung, garut, total}. */
 export async function fetchStockFor(
   productIds: string[],
