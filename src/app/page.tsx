@@ -13,6 +13,9 @@ import { HowToBuy } from "@/components/HowToBuy";
 import { CtaBand } from "@/components/CtaBand";
 import { BranchCard } from "@/components/BranchCard";
 
+// ISR: halaman tetap statis tapi menyegarkan jumlah produk & stok tiap jam.
+export const revalidate = 3600;
+
 const FEATURES: [string, string][] = [
   ["Harga grosir", "Harga langsung untuk pembelian banyak — tanpa nego panjang."],
   ["Stok nyata 2 cabang", "Jumlah stok Bandung & Garut tampil apa adanya, sinkron dengan kasir."],
@@ -49,7 +52,7 @@ export default async function Home() {
               Grosir kemasan &amp; mesin · Bandung — Garut
             </div>
             <h1 className="mt-5 font-display text-5xl font-medium leading-[1.02] tracking-tight sm:text-6xl">
-              Semua kebutuhan kemasan usahamu, satu tempat.
+              Grosir kemasan plastik &amp; mesin pengemas, satu tempat.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
               Lebih dari {fmt.format(total)} produk — plastik, kertas, box, hingga mesin
