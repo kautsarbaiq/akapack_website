@@ -1,5 +1,6 @@
 import { cache } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
@@ -9,8 +10,12 @@ import {
   fetchProductsPage,
 } from "@/lib/catalog";
 import { displayPrice, formatRupiah, monogram, titleCase } from "@/lib/format";
+import { SITE_URL } from "@/lib/site";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { ProductCard } from "@/components/ProductCard";
+
+// ISR: tiap halaman produk di-cache 1 jam (render sekali, segarkan stok/harga).
+export const revalidate = 3600;
 
 const getProduct = cache((id: string) => fetchProductById(id));
 
@@ -21,7 +26,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const p = await getProduct(id);
-  return { title: p ? p.name : "Produk tidak ditemukan" };
+  if (!p) {
+    return { title: "Produk tidak ditemukan", robots: { index: false, follow: false } };
+  }
+  const price = formatRupiah(displayPrice(p));
+  const unit = p.unit ?? "pcs";
+  const description = `${p.name} — harga grosir ${price}/${unit} di Akapack. Stok nyata cabang Bandung & Garut, pesan cepat via WhatsApp.`;
+  const images = p.image_url ? [{ url: p.image_url }] : undefined;
+  return {
+    title: p.name,
+    description,
+    alternates: { canonical: `/produk/${id}` },
+    openGraph: {
+      type: "website",
+      siteName: "Akapack",
+      locale: "id_ID",
+      title: `${p.name} · Akapack`,
+      description,
+      url: `/produk/${id}`,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: p.name,
+      description,
+      images: images?.map((i) => i.url),
+    },
+  };
 }
 
 export default async function ProductDetailPage({
@@ -58,8 +89,67 @@ export default async function ProductDetailPage({
     color: category?.color ?? null,
   };
 
+  // Structured data: Product + Offer (rich result harga & ketersediaan).
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": `${SITE_URL}/produk/${id}#product`,
+    name: product.name,
+    ...(product.sku ? { sku: product.sku } : {}),
+    ...(product.barcode ? { gtin: product.barcode } : {}),
+    ...(product.image_url ? { image: product.image_url } : {}),
+    ...(product.description ? { description: product.description } : {}),
+    ...(category ? { category: titleCase(category.name) } : {}),
+    brand: { "@type": "Brand", name: "Akapack" },
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/produk/${id}`,
+      priceCurrency: "IDR",
+      price,
+      availability:
+        stock.total > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/PreOrder",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@id": `${SITE_URL}/#org` },
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+      { "@type": "ListItem", position: 2, name: "Katalog", item: `${SITE_URL}/produk` },
+      ...(category
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: titleCase(category.name),
+              item: `${SITE_URL}/produk?kategori=${category.id}`,
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: category ? 4 : 3,
+        name: product.name,
+        item: `${SITE_URL}/produk/${id}`,
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="font-mono text-xs text-ink-soft" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-ink">Beranda</Link>
@@ -79,8 +169,14 @@ export default async function ProductDetailPage({
         {/* Visual */}
         <div className="relative aspect-square overflow-hidden border border-line">
           {product.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+            <Image
+              src={product.image_url}
+              alt={`${product.name}${category ? " — " + titleCase(category.name) : ""} · grosir kemasan Akapack`}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
           ) : (
             <div className="absolute inset-0" style={{ backgroundColor: color }}>
               <span
