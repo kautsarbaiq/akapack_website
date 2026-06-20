@@ -3,8 +3,10 @@ import { SITE, waLink } from "@/lib/site";
 import { ContactWaForm } from "@/components/ContactWaForm";
 
 export const metadata: Metadata = {
-  title: "Kontak",
-  description: "Hubungi Akapack via WhatsApp untuk pertanyaan produk, stok, dan pemesanan grosir.",
+  title: "Kontak — Akapack Bandung & Garut",
+  description:
+    "Hubungi Akapack via WhatsApp atau telepon untuk pertanyaan produk, cek stok, dan pemesanan grosir di cabang Bandung & Garut.",
+  alternates: { canonical: "/kontak" },
 };
 
 export default function KontakPage() {
@@ -28,22 +30,30 @@ export default function KontakPage() {
               <h2 className="mt-2 font-display text-xl font-medium">{o.name}</h2>
               <p className="mt-2 text-sm leading-relaxed text-ink-soft">{o.address}</p>
               <p className="mt-1 text-sm text-ink-soft">{o.hours}</p>
-              <a
-                href={waLink(o.wa, `Halo ${o.name}, saya mau bertanya.`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 border border-ink px-5 py-2.5 text-sm font-medium hover:bg-ink hover:text-paper"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {o.phone}
-              </a>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a
+                  href={waLink(o.wa, `Halo ${o.name}, saya mau bertanya.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 border border-ink px-5 py-2.5 text-sm font-medium hover:bg-ink hover:text-paper"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  WhatsApp {o.phone}
+                </a>
+                <a
+                  href={`tel:${o.tel}`}
+                  className="inline-flex items-center border border-ink px-5 py-2.5 text-sm font-medium hover:bg-ink hover:text-paper"
+                >
+                  Telepon
+                </a>
+              </div>
             </div>
           ))}
         </div>

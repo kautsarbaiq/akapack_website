@@ -35,14 +35,20 @@ export function SiteFooter() {
                 <li key={o.key}>
                   <div className="font-medium text-ink">{o.name}</div>
                   <div className="text-ink-soft">{o.address}</div>
-                  <a
-                    href={waLink(o.wa)}
-                    className="text-indigo-ink hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {o.phone}
-                  </a>
+                  <div className="text-ink-soft">{o.hours}</div>
+                  <div className="mt-1 flex gap-3">
+                    <a href={`tel:${o.tel}`} className="text-indigo-ink hover:underline">
+                      {o.phone}
+                    </a>
+                    <a
+                      href={waLink(o.wa)}
+                      className="text-indigo-ink hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
                 </li>
               ))}
             </ul>

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { SITE, waLink } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Cabang",
+  title: "Cabang Bandung & Garut — Alamat, Jam Buka & Peta",
   description:
-    "Dua cabang Akapack: Akapack Bandung (Kiaracondong) & Toko Kemasan Garut (Tarogong Kidul). Alamat, jam buka, dan kontak WhatsApp.",
+    "Dua cabang Akapack: Akapack Bandung (Kiaracondong) & Toko Kemasan Garut (Tarogong Kidul). Alamat, jam buka, peta, telepon & WhatsApp.",
+  alternates: { canonical: "/cabang" },
 };
 
 export default function CabangPage() {
@@ -50,6 +51,12 @@ export default function CabangPage() {
                   className="bg-indigo px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
                 >
                   WhatsApp
+                </a>
+                <a
+                  href={`tel:${o.tel}`}
+                  className="border border-ink px-5 py-2.5 text-sm font-medium hover:bg-ink hover:text-paper"
+                >
+                  Telepon
                 </a>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}`}

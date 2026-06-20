@@ -5,6 +5,7 @@ export interface Outlet {
   name: string;
   address: string;
   phone: string;
+  tel: string;
   wa: string;
   hours: string;
   role: string;
@@ -40,6 +41,12 @@ export function BranchCard({ outlet: o }: { outlet: Outlet }) {
           className="bg-indigo px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           WhatsApp {o.phone}
+        </a>
+        <a
+          href={`tel:${o.tel}`}
+          className="border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-paper"
+        >
+          Telp
         </a>
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}`}

@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { fetchCategories, fetchCategoryCounts } from "@/lib/catalog";
 import { buildCategoryGroups, countByGroup } from "@/lib/category-groups";
-import { SITE } from "@/lib/site";
+import { SITE, SITE_URL } from "@/lib/site";
 import { HowToBuy } from "@/components/HowToBuy";
 import { CtaBand } from "@/components/CtaBand";
 import { BranchCard } from "@/components/BranchCard";
 
 export const metadata: Metadata = {
-  title: "Tentang kami",
+  title: "Tentang Kami — Grosir Kemasan Bandung & Garut",
   description:
     "Akapack — pusat grosir kemasan plastik, kertas, dan mesin pengemas di Bandung & Garut. Harga grosir, stok lengkap, dua cabang.",
+  alternates: { canonical: "/tentang" },
 };
 
 const VALUES: [string, string][] = [
@@ -52,6 +53,10 @@ export default async function TentangPage() {
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "@id": `${SITE_URL}/tentang#faq`,
+    url: `${SITE_URL}/tentang`,
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    about: { "@id": `${SITE_URL}/#org` },
     mainEntity: FAQ.map(([q, a]) => ({
       "@type": "Question",
       name: q,
