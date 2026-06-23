@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# preview foto produk (lokal, jangan commit)
+public/_fotopreview/
+scripts/photo-match/*.local
