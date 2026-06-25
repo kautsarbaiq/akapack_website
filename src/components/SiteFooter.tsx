@@ -20,6 +20,8 @@ export function SiteFooter() {
             </h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/produk" className="text-ink-soft hover:text-ink">Katalog produk</Link></li>
+              <li><Link href="/grosir-kemasan-bandung" className="text-ink-soft hover:text-ink">Grosir kemasan Bandung</Link></li>
+              <li><Link href="/grosir-kemasan-garut" className="text-ink-soft hover:text-ink">Grosir kemasan Garut</Link></li>
               <li><Link href="/tentang" className="text-ink-soft hover:text-ink">Tentang kami</Link></li>
               <li><Link href="/cabang" className="text-ink-soft hover:text-ink">Cabang</Link></li>
               <li><Link href="/kontak" className="text-ink-soft hover:text-ink">Kontak</Link></li>
