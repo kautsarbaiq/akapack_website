@@ -6,6 +6,7 @@ import { SITE_URL } from "@/lib/site";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteJsonLd } from "@/components/SiteJsonLd";
+import { ChromeGate } from "@/components/ChromeGate";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({
@@ -68,9 +69,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="flex min-h-full flex-col">
         <SiteJsonLd />
         <CartProvider>
-          <SiteHeader />
+          <ChromeGate>
+            <SiteHeader />
+          </ChromeGate>
           <main className="flex-1">{children}</main>
-          <SiteFooter />
+          <ChromeGate>
+            <SiteFooter />
+          </ChromeGate>
         </CartProvider>
       </body>
     </html>

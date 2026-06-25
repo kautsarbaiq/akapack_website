@@ -21,9 +21,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-6">
             <span className="font-mono text-sm font-medium tracking-[0.16em]">DASHBOARD</span>
-            <nav className="flex gap-4 text-sm">
+            <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               <Link href="/dashboard" className="text-ink-soft hover:text-ink">Ringkasan</Link>
               <Link href="/dashboard/produk" className="text-ink-soft hover:text-ink">Produk</Link>
+              <Link href="/dashboard/kategori" className="text-ink-soft hover:text-ink">Kategori</Link>
               <Link href="/" className="text-ink-soft hover:text-ink">Lihat situs ↗</Link>
             </nav>
           </div>
