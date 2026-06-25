@@ -130,7 +130,7 @@ export default async function Home() {
           {groups.map((g) => (
             <Link
               key={g.slug}
-              href={`/produk?grup=${g.slug}`}
+              href={`/produk/grup/${g.slug}`}
               className="group relative flex aspect-square flex-col justify-between overflow-hidden p-3 text-white transition-transform hover:-translate-y-0.5"
               style={{ backgroundColor: g.categories[0]?.color || "#4f46e5" }}
             >

@@ -166,7 +166,7 @@ export default async function TentangPage() {
           {groups.map((g) => (
             <Link
               key={g.slug}
-              href={`/produk?grup=${g.slug}`}
+              href={`/produk/grup/${g.slug}`}
               className="flex items-center justify-between gap-4 border border-line bg-card p-5 transition-colors hover:border-ink/25 hover:bg-paper-2"
             >
               <span className="font-medium">{g.label}</span>

@@ -83,3 +83,110 @@ export function groupLabel(slug: string): string {
     (slug === OTHER_GROUP.slug ? OTHER_GROUP.label : slug)
   );
 }
+
+/** Semua slug grup (untuk generateStaticParams landing page grup). */
+export function allGroupSlugs(): string[] {
+  return [...CATEGORY_GROUPS.map((g) => g.slug), OTHER_GROUP.slug];
+}
+
+export interface GroupSeo {
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+}
+
+/** Konten SEO landing page per grup (judul/deskripsi/H1/intro ber-keyword + lokal). */
+export const GROUP_SEO: Record<string, GroupSeo> = {
+  mesin: {
+    title: "Grosir Mesin Pengemas & Alat Usaha — Bandung & Garut",
+    description:
+      "Jual mesin pengemas (sealer, cup sealer, filling, mixer), timbangan & alat usaha harga grosir di Akapack Bandung & Garut. Stok nyata, konsultasi via WhatsApp.",
+    h1: "Mesin Pengemas & Alat Usaha",
+    intro:
+      "Akapack menyediakan beragam mesin pengemas dan alat pendukung usaha — mulai dari hand sealer, continuous sealer, cup sealer, mesin filling, hingga mixer dan timbangan digital. Cocok untuk UMKM kuliner, katering, hingga produsen skala kecil yang ingin mengemas produk lebih rapi, cepat, dan higienis. Semua dengan harga grosir dan stok nyata dari dua cabang kami di Bandung (Kiaracondong) dan Garut (Tarogong Kidul). Bingung memilih mesin yang sesuai kapasitas usahamu? Tim kami siap bantu lewat WhatsApp.",
+  },
+  baking: {
+    title: "Grosir Alat Baking & Perlengkapan Dapur — Bandung & Garut",
+    description:
+      "Loyang, cetakan, spatula, alat baking & perlengkapan dapur harga grosir di Akapack Bandung & Garut. Lengkap untuk bakery, kafe & UMKM kuliner.",
+    h1: "Alat Baking & Perlengkapan Dapur",
+    intro:
+      "Lengkapi dapur dan usaha kue Anda dengan koleksi alat baking Akapack: loyang aneka bentuk, cetakan kue, spatula, alat silikon, saringan, hingga peralatan saji. Pas untuk toko kue, bakery, kafe, katering, maupun pembuat kue rumahan. Tersedia satuan maupun grosir dengan stok nyata dari cabang Bandung dan Garut, plus harga bersaing untuk pembelian banyak.",
+  },
+  cup: {
+    title: "Grosir Cup, Gelas Plastik & Tutup (Lid) — Bandung & Garut",
+    description:
+      "Cup plastik, gelas, paper cup, sedotan & lid/tutup harga grosir di Akapack Bandung & Garut. Pas untuk kedai minuman, kafe, boba & katering.",
+    h1: "Cup, Gelas Plastik & Tutup",
+    intro:
+      "Butuh kemasan minuman? Akapack menyediakan cup plastik, gelas, paper cup, jelly cup, sedotan, dan tutup (lid) dalam berbagai ukuran. Ideal untuk kedai kopi, gerai boba, jus, kafe, hingga katering yang butuh kemasan minuman rapi dan ekonomis. Harga grosir, stok nyata dua cabang Bandung & Garut, dan bisa pesan cepat via WhatsApp.",
+  },
+  botol: {
+    title: "Grosir Botol, Toples & Jar Plastik — Bandung & Garut",
+    description:
+      "Botol plastik, toples, jar & tabung kemasan harga grosir di Akapack Bandung & Garut. Untuk minuman, frozen food, kue kering & produk UMKM.",
+    h1: "Botol, Toples & Jar",
+    intro:
+      "Koleksi botol plastik, toples, jar, dan tabung kemasan Akapack cocok untuk minuman kemasan, madu, sambal, kue kering, frozen food, hingga produk kosmetik dan UMKM. Tersedia beragam ukuran dan model dengan harga grosir serta stok nyata dari cabang Bandung dan Garut.",
+  },
+  box: {
+    title: "Grosir Box Makanan, Mika & Tray — Bandung & Garut",
+    description:
+      "Box makanan, mika, tray, thinwall & dus harga grosir di Akapack Bandung & Garut. Cocok untuk katering, frozen food & online food seller.",
+    h1: "Box Makanan, Mika & Tray",
+    intro:
+      "Kemas makanan dengan rapi dan aman memakai box, mika, tray, thinwall, bento, hingga dus dari Akapack. Pilihan tepat untuk katering, nasi box, frozen food, kue, dan penjual makanan online. Harga grosir untuk pembelian banyak, stok nyata dua cabang Bandung & Garut.",
+  },
+  plastik: {
+    title: "Grosir Plastik & Kantong (Kresek, Wrap) — Bandung & Garut",
+    description:
+      "Kantong kresek, plastik HD/PE, cling wrap, bubble wrap & sarung tangan harga grosir di Akapack Bandung & Garut. Stok nyata dua cabang.",
+    h1: "Plastik & Kantong",
+    intro:
+      "Kebutuhan plastik usaha lengkap di Akapack: kantong kresek, plastik HD/PE/PP, cling wrap, bubble wrap, sarung tangan plastik, karung, hingga segel. Cocok untuk toko, warung, online seller, dan produsen yang butuh kemasan dan pelindung pengiriman. Harga grosir, stok nyata dari Bandung dan Garut.",
+  },
+  kertas: {
+    title: "Grosir Paper Bag, Kertas Nasi & Kemasan Kertas — Bandung & Garut",
+    description:
+      "Paper bag, kertas nasi, kraft, amplop, sleeve & cetak kemasan harga grosir di Akapack Bandung & Garut. Untuk bakery, kafe & UMKM kuliner.",
+    h1: "Kertas Kemasan & Cetak",
+    intro:
+      "Akapack menyediakan aneka kemasan berbahan kertas: paper bag, kertas nasi, kraft, amplop, sleeve, hingga layanan cetak kemasan. Ramah untuk brand makanan, bakery, kafe, dan UMKM yang ingin tampil rapi sekaligus eco-friendly. Harga grosir dan stok nyata dari dua cabang Bandung & Garut.",
+  },
+  pangan: {
+    title: "Grosir Bahan Tambahan Pangan & Bumbu Tabur — Bandung & Garut",
+    description:
+      "Anti tengik (oxygen absorber), bumbu tabur & bahan pendukung pangan harga grosir di Akapack Bandung & Garut. Stok nyata, pesan via WhatsApp.",
+    h1: "Bahan & Pendukung Pangan",
+    intro:
+      "Jaga kualitas dan rasa produk makanan Anda dengan bahan pendukung pangan dari Akapack — seperti anti tengik (oxygen absorber) dan bumbu tabur aneka rasa. Cocok untuk produsen snack, frozen food, dan UMKM kuliner. Harga grosir, stok nyata dua cabang Bandung & Garut.",
+  },
+  kemasan: {
+    title: "Grosir Aneka Kemasan Usaha — Akapack Bandung & Garut",
+    description:
+      "Beragam kemasan pendukung usaha harga grosir di Akapack Bandung & Garut. Stok nyata dua cabang, harga grosir, pesan cepat via WhatsApp.",
+    h1: "Aneka Kemasan",
+    intro:
+      "Beragam pilihan kemasan untuk kebutuhan usaha Anda, tersedia dengan harga grosir dan stok nyata dari cabang Akapack Bandung dan Garut. Tidak menemukan yang dicari? Hubungi kami via WhatsApp dan tim kami bantu carikan.",
+  },
+  lainnya: {
+    title: "Produk Lainnya — Grosir Kemasan Akapack Bandung & Garut",
+    description:
+      "Aneka produk pelengkap usaha harga grosir di Akapack Bandung & Garut. Stok nyata dua cabang, pesan cepat via WhatsApp.",
+    h1: "Produk Lainnya",
+    intro:
+      "Berbagai produk pelengkap kebutuhan usaha yang tersedia di Akapack dengan harga grosir dan stok nyata dari cabang Bandung dan Garut. Pesan mudah lewat WhatsApp.",
+  },
+};
+
+export function groupSeo(slug: string): GroupSeo {
+  return (
+    GROUP_SEO[slug] ?? {
+      title: `${groupLabel(slug)} — Grosir Kemasan Akapack`,
+      description: `Grosir ${groupLabel(slug)} di Akapack Bandung & Garut. Harga grosir, stok nyata dua cabang.`,
+      h1: groupLabel(slug),
+      intro: `Koleksi ${groupLabel(slug)} dengan harga grosir dan stok nyata dari cabang Akapack Bandung & Garut.`,
+    }
+  );
+}

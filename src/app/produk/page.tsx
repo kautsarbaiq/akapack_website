@@ -53,7 +53,8 @@ export async function generateMetadata({
     canonical = `/produk?kategori=${kategori}`;
   } else if (grup) {
     label = groupLabel(grup);
-    canonical = `/produk?grup=${grup}`;
+    // Konsolidasikan ke landing page grup yang ber-URL bersih (SEO).
+    canonical = `/produk/grup/${grup}`;
   }
 
   const title = q
