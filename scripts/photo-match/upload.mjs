@@ -8,6 +8,8 @@ import { extname, basename } from "node:path";
 
 const LIMIT = Number(process.argv[2]) || Infinity;
 const OUT = "/tmp/photo-match";
+const SRC = process.env.SRC || `${OUT}/matches.json`;
+const TIERS = (process.env.TIERS || "high,medium").split(",");
 const TMP = `${OUT}/resized`;
 const BUCKET = "product-images";
 const CONCURRENCY = 6;
@@ -27,9 +29,9 @@ const mime = (ext) =>
   ext === ".png" ? "image/png" : ext === ".webp" ? "image/webp" : "image/jpeg";
 
 mkdirSync(TMP, { recursive: true });
-const matches = JSON.parse(readFileSync(`${OUT}/matches.json`, "utf8"))
-  .filter((m) => m.tier === "high" || m.tier === "medium")
-  .slice(0, LIMIT === Infinity ? undefined : LIMIT);
+const matches = JSON.parse(readFileSync(SRC, "utf8"))
+  .filter((m) => m.path && TIERS.includes(m.tier))
+  .slice(0, LIMIT);
 
 let done = 0, failed = 0, i = 0;
 const errors = [];
