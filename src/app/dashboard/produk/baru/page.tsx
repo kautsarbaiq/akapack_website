@@ -60,6 +60,14 @@ export default async function TambahProduk() {
             <label className={label}>Harga online (opsional)</label>
             <input name="price_online" type="number" min="0" className={input} />
           </div>
+          <div>
+            <label className={label}>Stok awal Bandung</label>
+            <input name="stock_bandung" type="number" min="0" defaultValue={0} className={input} />
+          </div>
+          <div>
+            <label className={label}>Stok awal Garut</label>
+            <input name="stock_garut" type="number" min="0" defaultValue={0} className={input} />
+          </div>
         </div>
 
         <div>

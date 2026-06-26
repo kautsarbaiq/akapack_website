@@ -57,8 +57,11 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-line pt-6 text-xs text-ink-soft">
-          © {new Date().getFullYear()} {SITE.name}. Seluruh harga dapat berubah sewaktu-waktu.
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 text-xs text-ink-soft">
+          <span>© {new Date().getFullYear()} {SITE.name}. Seluruh harga dapat berubah sewaktu-waktu.</span>
+          <Link href="/login" className="font-mono hover:text-ink">
+            Login karyawan →
+          </Link>
         </div>
       </div>
     </footer>

@@ -25,6 +25,34 @@ async function uploadImage(
   };
 }
 
+/** Set stok satu produk di satu cabang (update jika ada, insert jika belum). */
+async function setStock(
+  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
+  productId: string,
+  outletId: string,
+  stock: number,
+): Promise<string | null> {
+  const { data: existing } = await supabase
+    .from("inventory")
+    .select("id")
+    .eq("product_id", productId)
+    .eq("outlet_id", outletId)
+    .maybeSingle();
+  if (existing?.id) {
+    const { error } = await supabase.from("inventory").update({ stock }).eq("id", existing.id);
+    return error ? error.message : null;
+  }
+  const { error } = await supabase
+    .from("inventory")
+    .insert({ product_id: productId, outlet_id: outletId, stock, tenant_id: TENANT_ID });
+  return error ? error.message : null;
+}
+
+function num(v: FormDataEntryValue | null): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+}
+
 /** Update produk yang sudah ada. */
 export async function updateProduct(formData: FormData) {
   const id = String(formData.get("id") || "");
@@ -55,6 +83,15 @@ export async function updateProduct(formData: FormData) {
 
   const { error } = await supabase.from("products").update(patch).eq("id", id);
   if (error) fail("Gagal menyimpan: " + error.message);
+
+  if (formData.has("stock_bandung")) {
+    const e = await setStock(supabase, id, OUTLETS.bandung, num(formData.get("stock_bandung")));
+    if (e) fail("Gagal simpan stok Bandung: " + e);
+  }
+  if (formData.has("stock_garut")) {
+    const e = await setStock(supabase, id, OUTLETS.garut, num(formData.get("stock_garut")));
+    if (e) fail("Gagal simpan stok Garut: " + e);
+  }
 
   revalidatePath(`/produk/${id}`);
   revalidatePath("/dashboard/produk");
@@ -102,8 +139,24 @@ export async function createProduct(formData: FormData) {
     image_url,
   };
 
-  const { error } = await supabase.from("products").insert(insert);
+  const { data: created, error } = await supabase
+    .from("products")
+    .insert(insert)
+    .select("id")
+    .single();
   if (error) fail("Gagal menambah produk: " + error.message);
+
+  const newId = created?.id as string | undefined;
+  if (newId) {
+    if (formData.has("stock_bandung")) {
+      const e = await setStock(supabase, newId, OUTLETS.bandung, num(formData.get("stock_bandung")));
+      if (e) fail("Produk dibuat, tapi stok Bandung gagal: " + e);
+    }
+    if (formData.has("stock_garut")) {
+      const e = await setStock(supabase, newId, OUTLETS.garut, num(formData.get("stock_garut")));
+      if (e) fail("Produk dibuat, tapi stok Garut gagal: " + e);
+    }
+  }
 
   revalidatePath("/produk");
   revalidatePath("/dashboard/produk");
