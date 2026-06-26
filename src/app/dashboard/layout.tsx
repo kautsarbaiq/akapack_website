@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { isStaff } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -13,7 +14,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login?next=/dashboard");
+  if (!isStaff(user.email)) redirect("/");
 
   return (
     <div className="min-h-[80vh] bg-paper-2">

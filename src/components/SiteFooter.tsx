@@ -59,7 +59,7 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 text-xs text-ink-soft">
           <span>© {new Date().getFullYear()} {SITE.name}. Seluruh harga dapat berubah sewaktu-waktu.</span>
-          <Link href="/login" className="font-mono hover:text-ink">
+          <Link href="/login?next=/dashboard" className="font-mono hover:text-ink">
             Login karyawan →
           </Link>
         </div>

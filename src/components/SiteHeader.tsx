@@ -41,6 +41,12 @@ export function SiteHeader() {
             <SearchIcon />
             <span className="hidden sm:inline">Cari produk</span>
           </Link>
+          <Link
+            href="/login"
+            className="border border-line bg-card px-3 py-2 text-sm text-ink-soft transition-colors hover:border-ink/30 hover:text-ink"
+          >
+            Masuk
+          </Link>
           <CartButton />
         </div>
       </div>

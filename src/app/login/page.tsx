@@ -1,13 +1,14 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = params.get("next") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +32,11 @@ function LoginForm() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center px-4 py-16">
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
-        Dashboard Karyawan
+        Akun Akapack
       </div>
       <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">Masuk</h1>
       <p className="mt-2 text-sm text-ink-soft">
-        Gunakan akun karyawan Akapack (sama dengan aplikasi POS).
+        Masuk untuk belanja lebih cepat. Karyawan diarahkan otomatis ke dashboard.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -72,6 +73,13 @@ function LoginForm() {
           {loading ? "Memproses…" : "Masuk"}
         </button>
       </form>
+
+      <p className="mt-6 text-sm text-ink-soft">
+        Belum punya akun?{" "}
+        <Link href="/register" className="font-medium text-indigo-ink hover:underline">
+          Daftar di sini
+        </Link>
+      </p>
     </div>
   );
 }

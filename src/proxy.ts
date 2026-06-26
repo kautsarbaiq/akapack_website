@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isStaff } from "@/lib/auth";
 
 /**
  * Proxy (pengganti middleware di Next 16): menyegarkan sesi Supabase &
@@ -32,16 +33,25 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
+  const staff = isStaff(user?.email);
 
-  if (!user && pathname.startsWith("/dashboard")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  if (pathname.startsWith("/dashboard")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    if (!staff) {
+      // Pembeli yang login bukan karyawan → tidak boleh ke dashboard.
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = staff ? "/dashboard" : "/";
     return NextResponse.redirect(url);
   }
 
