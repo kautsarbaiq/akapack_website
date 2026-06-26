@@ -3,7 +3,12 @@ import { fetchCategoryCounts } from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
 import { createCategory, renameCategory, toggleCategory } from "./actions";
 
-export default async function KategoriPage() {
+export default async function KategoriPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; err?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createSupabaseServer();
   const { data } = await supabase
     .from("categories")
@@ -26,6 +31,17 @@ export default async function KategoriPage() {
     <div className="max-w-3xl">
       <h1 className="font-display text-2xl font-medium tracking-tight">Kategori</h1>
       <p className="mt-1 text-ink-soft">{categories.length} kategori. Tambah atau ubah nama kategori produk.</p>
+
+      {sp.saved && (
+        <div className="mt-4 border border-green-600/40 bg-green-50 px-4 py-2 text-sm text-green-800">
+          Tersimpan.
+        </div>
+      )}
+      {sp.err && (
+        <div className="mt-4 border border-red-600/40 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {sp.err}
+        </div>
+      )}
 
       {/* Tambah */}
       <form action={createCategory} className="mt-6 flex gap-2">

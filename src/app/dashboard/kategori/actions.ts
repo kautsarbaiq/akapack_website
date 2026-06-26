@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { TENANT_ID } from "@/lib/supabase";
 
+const fail = (msg: string) => redirect(`/dashboard/kategori?err=${encodeURIComponent(msg)}`);
+
 async function authed() {
   const supabase = await createSupabaseServer();
   const {
@@ -26,8 +28,9 @@ export async function createCategory(formData: FormData) {
   const { error } = await supabase
     .from("categories")
     .insert({ name, tenant_id: TENANT_ID, is_active: true });
-  if (error) throw new Error("Gagal menambah kategori: " + error.message);
+  if (error) fail("Gagal menambah kategori: " + error.message);
   refresh();
+  redirect("/dashboard/kategori?saved=1");
 }
 
 export async function renameCategory(formData: FormData) {
@@ -36,8 +39,9 @@ export async function renameCategory(formData: FormData) {
   if (!id || !name) return;
   const supabase = await authed();
   const { error } = await supabase.from("categories").update({ name }).eq("id", id);
-  if (error) throw new Error("Gagal mengubah kategori: " + error.message);
+  if (error) fail("Gagal mengubah kategori: " + error.message);
   refresh();
+  redirect("/dashboard/kategori?saved=1");
 }
 
 export async function toggleCategory(formData: FormData) {
@@ -46,6 +50,7 @@ export async function toggleCategory(formData: FormData) {
   if (!id) return;
   const supabase = await authed();
   const { error } = await supabase.from("categories").update({ is_active: !active }).eq("id", id);
-  if (error) throw new Error("Gagal mengubah status: " + error.message);
+  if (error) fail("Gagal mengubah status: " + error.message);
   refresh();
+  redirect("/dashboard/kategori?saved=1");
 }

@@ -8,6 +8,7 @@ interface SP {
   q?: string;
   hal?: string;
   saved?: string;
+  err?: string;
 }
 
 export default async function DashboardProdukList({
@@ -44,22 +45,35 @@ export default async function DashboardProdukList({
           <h1 className="font-display text-2xl font-medium tracking-tight">Produk</h1>
           <p className="mt-1 font-mono text-xs text-ink-soft">{total} produk</p>
         </div>
-        <form className="flex gap-2">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Cari nama / SKU…"
-            className="border border-line bg-card px-3 py-2 text-sm outline-none focus:border-ink"
-          />
-          <button className="border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-paper">
-            Cari
-          </button>
-        </form>
+        <div className="flex flex-wrap items-center gap-2">
+          <form className="flex gap-2">
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Cari nama / SKU…"
+              className="border border-line bg-card px-3 py-2 text-sm outline-none focus:border-ink"
+            />
+            <button className="border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-paper">
+              Cari
+            </button>
+          </form>
+          <Link
+            href="/dashboard/produk/baru"
+            className="bg-indigo px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          >
+            + Tambah produk
+          </Link>
+        </div>
       </div>
 
       {sp.saved && (
         <div className="mt-4 border border-green-600/40 bg-green-50 px-4 py-2 text-sm text-green-800">
-          Perubahan tersimpan.
+          Tersimpan.
+        </div>
+      )}
+      {sp.err && (
+        <div className="mt-4 border border-red-600/40 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {sp.err}
         </div>
       )}
 
