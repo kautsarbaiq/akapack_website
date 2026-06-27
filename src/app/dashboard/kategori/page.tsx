@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { fetchCategoryCounts } from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
@@ -30,7 +31,10 @@ export default async function KategoriPage({
   return (
     <div className="max-w-3xl">
       <h1 className="font-display text-2xl font-medium tracking-tight">Kategori</h1>
-      <p className="mt-1 text-ink-soft">{categories.length} kategori. Tambah atau ubah nama kategori produk.</p>
+      <p className="mt-1 text-ink-soft">
+        {categories.length} kategori. Tambah/ubah nama, atau klik jumlah produk untuk mengelola &
+        memindahkan isinya.
+      </p>
 
       {sp.saved && (
         <div className="mt-4 border border-green-600/40 bg-green-50 px-4 py-2 text-sm text-green-800">
@@ -69,9 +73,13 @@ export default async function KategoriPage({
                   Simpan
                 </button>
               </form>
-              <span className="w-20 text-right font-mono text-xs text-ink-soft">
-                {fmt.format(counts.get(id) ?? 0)} produk
-              </span>
+              <Link
+                href={`/dashboard/produk?kategori=${id}`}
+                className="w-28 text-right font-mono text-xs text-indigo-ink hover:underline"
+                title="Kelola produk di kategori ini"
+              >
+                {fmt.format(counts.get(id) ?? 0)} produk →
+              </Link>
               <form action={toggleCategory}>
                 <input type="hidden" name="id" value={id} />
                 <input type="hidden" name="active" value={String(active)} />
