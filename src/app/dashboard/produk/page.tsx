@@ -11,6 +11,7 @@ interface SP {
   kategori?: string;
   status?: string;
   foto?: string;
+  harga?: string;
   hal?: string;
   saved?: string;
   err?: string;
@@ -26,6 +27,7 @@ export default async function DashboardProdukList({
   const kategori = sp.kategori || "";
   const status = sp.status || "";
   const foto = sp.foto || "";
+  const harga = sp.harga || "";
   const page = Math.max(1, Number.parseInt(sp.hal ?? "1", 10) || 1);
 
   const supabase = await createSupabaseServer();
@@ -43,6 +45,7 @@ export default async function DashboardProdukList({
   else if (status === "nonaktif") query = query.eq("is_active", false);
   if (foto === "tanpa") query = query.is("image_url", null);
   else if (foto === "ada") query = query.not("image_url", "is", null);
+  if (harga === "kosong") query = query.or("price.is.null,price.eq.0");
 
   const from = (page - 1) * PAGE;
   const { data, count } = await query.range(from, from + PAGE - 1);
@@ -56,6 +59,7 @@ export default async function DashboardProdukList({
     if (kategori) o.kategori = kategori;
     if (status) o.status = status;
     if (foto) o.foto = foto;
+    if (harga) o.harga = harga;
     return new URLSearchParams({ ...o, ...extra }).toString();
   };
 
@@ -97,10 +101,14 @@ export default async function DashboardProdukList({
           <option value="tanpa">Tanpa foto</option>
           <option value="ada">Ada foto</option>
         </select>
+        <select name="harga" defaultValue={harga} className={inputCls}>
+          <option value="">Semua harga</option>
+          <option value="kosong">Harga belum diisi</option>
+        </select>
         <button className="border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-paper">
           Terapkan
         </button>
-        {(q || kategori || status || foto) && (
+        {(q || kategori || status || foto || harga) && (
           <Link href="/dashboard/produk" className="px-3 py-2 text-sm text-ink-soft hover:text-ink">
             Reset
           </Link>

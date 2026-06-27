@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { fetchStockFor } from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
-import { updateProduct } from "../actions";
+import { updateProduct, duplicateProduct } from "../actions";
 
 export default async function EditProduk({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -142,6 +142,16 @@ export default async function EditProduk({ params }: { params: Promise<{ id: str
             Batal
           </Link>
         </div>
+      </form>
+
+      <form action={duplicateProduct} className="mt-6 border-t border-line pt-5">
+        <input type="hidden" name="id" value={p.id as string} />
+        <button className="border border-line px-5 py-2.5 text-sm font-medium hover:border-ink/40">
+          Duplikat produk ini
+        </button>
+        <span className="ml-3 text-xs text-ink-soft">
+          Membuat salinan (nama + “ (copy)”) untuk diedit jadi produk baru.
+        </span>
       </form>
     </div>
   );

@@ -213,3 +213,49 @@ export async function bulkProducts(formData: FormData) {
   revalidateCatalog();
   redirect(`/dashboard/produk?saved=${ids.length}`);
 }
+
+/** Duplikat produk (untuk membuat produk mirip dengan cepat). */
+export async function duplicateProduct(formData: FormData) {
+  const id = String(formData.get("id") || "");
+  if (!id) fail("ID produk kosong.");
+
+  const supabase = await createSupabaseServer();
+  const user = await requireStaff(supabase);
+
+  const { data: src } = await supabase
+    .from("products")
+    .select("name,description,category_id,unit,price,price_online,image_url")
+    .eq("id", id)
+    .maybeSingle();
+  if (!src) return fail("Produk sumber tidak ditemukan.");
+
+  const sku =
+    "WEB-" +
+    Date.now().toString(36).toUpperCase() +
+    Math.random().toString(36).slice(2, 5).toUpperCase();
+
+  const { data: created, error } = await supabase
+    .from("products")
+    .insert({
+      tenant_id: TENANT_ID,
+      outlet_id: OUTLETS.bandung,
+      created_by: user.id,
+      name: (src.name as string) + " (copy)",
+      sku,
+      description: src.description ?? null,
+      category_id: src.category_id ?? null,
+      unit: src.unit ?? null,
+      price: src.price ?? 0,
+      price_online: src.price_online ?? null,
+      stock: 0,
+      is_active: true,
+      has_variants: false,
+      image_url: src.image_url ?? null,
+    })
+    .select("id")
+    .single();
+  if (error) fail("Gagal menduplikat: " + error.message);
+
+  revalidateCatalog();
+  redirect(`/dashboard/produk/${created?.id}`);
+}
