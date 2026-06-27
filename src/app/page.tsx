@@ -7,7 +7,7 @@ import {
   fetchProductsPage,
   fetchStockFor,
 } from "@/lib/catalog";
-import { buildCategoryGroups, countByGroup } from "@/lib/category-groups";
+import { buildCategoryGroups, countByGroup, groupDefaultOrder } from "@/lib/category-groups";
 import { monogram } from "@/lib/format";
 import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
 import { ProductCard } from "@/components/ProductCard";
@@ -37,7 +37,7 @@ export default async function Home() {
 
   // Gabung grup dengan pengaturan (foto, urutan, label) dari dashboard.
   const displayGroups = groups
-    .map((g, i) => {
+    .map((g) => {
       const s = groupSettings.get(g.slug);
       return {
         slug: g.slug,
@@ -45,7 +45,7 @@ export default async function Home() {
         color: g.categories[0]?.color || "#4f46e5",
         image: s?.image_url || null,
         count: groupCounts.get(g.slug) ?? 0,
-        order: s?.sort_order ?? i + 100,
+        order: s?.sort_order ?? groupDefaultOrder(g.slug),
         active: s?.is_active ?? true,
       };
     })

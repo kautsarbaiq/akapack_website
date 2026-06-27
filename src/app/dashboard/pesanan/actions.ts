@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { isStaff } from "@/lib/auth";
 
 const ALLOWED = ["pending", "confirmed", "done", "cancelled"];
 
@@ -16,6 +17,7 @@ export async function updateOrderStatus(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (!isStaff(user.email)) redirect("/");
 
   const { error } = await supabase.from("orders").update({ status }).eq("id", id);
   if (error) redirect(`/dashboard/pesanan/${id}?err=` + encodeURIComponent(error.message));

@@ -89,6 +89,15 @@ export function allGroupSlugs(): string[] {
   return [...CATEGORY_GROUPS.map((g) => g.slug), OTHER_GROUP.slug];
 }
 
+/**
+ * Urutan default sebuah grup = posisinya di daftar statis. Dipakai SAMA di
+ * beranda & dashboard agar menyimpan satu kartu tidak mengacak urutan lainnya.
+ */
+export function groupDefaultOrder(slug: string): number {
+  const i = allGroupSlugs().indexOf(slug);
+  return i === -1 ? 999 : i;
+}
+
 export interface GroupSeo {
   title: string;
   description: string;

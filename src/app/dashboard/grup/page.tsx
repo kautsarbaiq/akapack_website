@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { CATEGORY_GROUPS, OTHER_GROUP } from "@/lib/category-groups";
+import { CATEGORY_GROUPS, OTHER_GROUP, groupDefaultOrder } from "@/lib/category-groups";
 import { saveGroup, clearGroupImage } from "./actions";
 
 interface Setting {
@@ -45,7 +45,7 @@ export default async function GrupPage({
       )}
 
       <div className="mt-6 space-y-3">
-        {groups.map((g, i) => {
+        {groups.map((g) => {
           const s = map.get(g.slug);
           return (
             <form
@@ -74,7 +74,7 @@ export default async function GrupPage({
                 <input
                   name="sort_order"
                   type="number"
-                  defaultValue={s?.sort_order ?? i + 1}
+                  defaultValue={s?.sort_order ?? groupDefaultOrder(g.slug)}
                   className={input}
                 />
               </div>

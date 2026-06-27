@@ -9,8 +9,10 @@ function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   // Default ke /dashboard: karyawan langsung masuk; pembeli otomatis dipantulkan
-  // ke beranda oleh proxy (karena bukan staf).
-  const next = params.get("next") || "/dashboard";
+  // ke beranda oleh proxy (karena bukan staf). Hanya izinkan path internal
+  // (cegah open-redirect ke domain luar).
+  const rawNext = params.get("next");
+  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

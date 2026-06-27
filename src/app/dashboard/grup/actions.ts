@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { isStaff } from "@/lib/auth";
 
 const BUCKET = "product-images";
 const fail = (m: string) => redirect(`/dashboard/grup?err=${encodeURIComponent(m)}`);
@@ -13,6 +14,7 @@ async function authed() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (!isStaff(user.email)) redirect("/");
   return supabase;
 }
 

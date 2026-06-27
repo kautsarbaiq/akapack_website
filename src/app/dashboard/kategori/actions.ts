@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { TENANT_ID } from "@/lib/supabase";
+import { isStaff } from "@/lib/auth";
 
 const fail = (msg: string) => redirect(`/dashboard/kategori?err=${encodeURIComponent(msg)}`);
 
@@ -13,6 +14,7 @@ async function authed() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (!isStaff(user.email)) redirect("/");
   return supabase;
 }
 
