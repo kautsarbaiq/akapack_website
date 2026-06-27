@@ -191,3 +191,25 @@ export async function createProduct(formData: FormData) {
   revalidateCatalog();
   redirect("/dashboard/produk?saved=1");
 }
+
+/** Aksi massal: aktifkan / nonaktifkan / pindah kategori untuk banyak produk. */
+export async function bulkProducts(formData: FormData) {
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  const action = String(formData.get("bulk") || "");
+  if (ids.length === 0) fail("Pilih dulu produk yang mau diubah.");
+
+  const supabase = await createSupabaseServer();
+  await requireStaff(supabase);
+
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (action === "aktif") patch.is_active = true;
+  else if (action === "nonaktif") patch.is_active = false;
+  else if (action === "kategori") patch.category_id = String(formData.get("bulk_category") || "") || null;
+  else fail("Aksi tidak dikenal.");
+
+  const { error } = await supabase.from("products").update(patch).in("id", ids);
+  if (error) fail("Gagal aksi massal: " + error.message);
+
+  revalidateCatalog();
+  redirect(`/dashboard/produk?saved=${ids.length}`);
+}
