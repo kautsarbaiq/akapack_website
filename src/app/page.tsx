@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   fetchCategories,
   fetchCategoryCounts,
+  fetchGroupSettings,
   fetchProductsPage,
   fetchStockFor,
 } from "@/lib/catalog";
@@ -24,13 +26,31 @@ const FEATURES: [string, string][] = [
 ];
 
 export default async function Home() {
-  const [categories, { byCategory, total }, featured] = await Promise.all([
+  const [categories, { byCategory, total }, featured, groupSettings] = await Promise.all([
     fetchCategories(),
     fetchCategoryCounts(),
     fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
+    fetchGroupSettings(),
   ]);
   const groups = buildCategoryGroups(categories);
   const groupCounts = countByGroup(categories, byCategory);
+
+  // Gabung grup dengan pengaturan (foto, urutan, label) dari dashboard.
+  const displayGroups = groups
+    .map((g, i) => {
+      const s = groupSettings.get(g.slug);
+      return {
+        slug: g.slug,
+        label: s?.label || g.label,
+        color: g.categories[0]?.color || "#4f46e5",
+        image: s?.image_url || null,
+        count: groupCounts.get(g.slug) ?? 0,
+        order: s?.sort_order ?? i + 100,
+        active: s?.is_active ?? true,
+      };
+    })
+    .filter((g) => g.active)
+    .sort((a, b) => a.order - b.order);
 
   // Etalase: utamakan produk berfoto, lengkapi dengan sisanya.
   const pool = featured.products;
@@ -127,22 +147,33 @@ export default async function Home() {
           </Link>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {groups.map((g) => (
+          {displayGroups.map((g) => (
             <Link
               key={g.slug}
               href={`/produk/grup/${g.slug}`}
               className="group relative flex aspect-square flex-col justify-between overflow-hidden p-3 text-white transition-transform hover:-translate-y-0.5"
-              style={{ backgroundColor: g.categories[0]?.color || "#4f46e5" }}
+              style={{ backgroundColor: g.color }}
             >
-              <span className="font-mono text-[64px] font-medium leading-none text-white/30">
-                {monogram(g.label)}
-              </span>
-              <span>
-                <span className="block font-mono text-xs uppercase tracking-[0.08em]">
-                  {g.label}
+              {g.image ? (
+                <>
+                  <Image
+                    src={g.image}
+                    alt={g.label}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                </>
+              ) : (
+                <span className="font-mono text-[64px] font-medium leading-none text-white/30">
+                  {monogram(g.label)}
                 </span>
-                <span className="mt-0.5 block font-mono text-[11px] text-white/70">
-                  {fmt.format(groupCounts.get(g.slug) ?? 0)} produk
+              )}
+              <span className="relative">
+                <span className="block font-mono text-xs uppercase tracking-[0.08em]">{g.label}</span>
+                <span className="mt-0.5 block font-mono text-[11px] text-white/80">
+                  {fmt.format(g.count)} produk
                 </span>
               </span>
             </Link>

@@ -169,6 +169,33 @@ export async function fetchCategoryCounts(): Promise<{
   return { byCategory, total };
 }
 
+export interface GroupSetting {
+  slug: string;
+  label: string | null;
+  image_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+/**
+ * Pengaturan kartu grup di beranda (foto, urutan, label). Map slug -> setting.
+ * Aman bila tabel belum ada (migrasi 0004) — kembalikan map kosong → beranda
+ * pakai default kode.
+ */
+export async function fetchGroupSettings(): Promise<Map<string, GroupSetting>> {
+  const map = new Map<string, GroupSetting>();
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("group_settings")
+      .select("slug,label,image_url,sort_order,is_active");
+    if (!error) for (const r of data ?? []) map.set(r.slug as string, r as GroupSetting);
+  } catch {
+    /* tabel belum ada → default */
+  }
+  return map;
+}
+
 /** Stok per cabang untuk sekumpulan produk → map productId -> {bandung, garut, total}. */
 export async function fetchStockFor(
   productIds: string[],
