@@ -56,3 +56,19 @@ export async function toggleCategory(formData: FormData) {
   refresh();
   redirect("/dashboard/kategori?saved=1");
 }
+
+/** Hapus kategori. Produk di dalamnya dipindah ke "tanpa kategori" agar tidak orphan. */
+export async function deleteCategory(formData: FormData) {
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const supabase = await authed();
+  const { error: moveErr } = await supabase
+    .from("products")
+    .update({ category_id: null })
+    .eq("category_id", id);
+  if (moveErr) fail("Gagal memindahkan produk: " + moveErr.message);
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) fail("Gagal menghapus kategori: " + error.message);
+  refresh();
+  redirect("/dashboard/kategori?saved=1");
+}

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { fetchCategoryCounts } from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
-import { createCategory, renameCategory, toggleCategory } from "./actions";
+import { createCategory, renameCategory, toggleCategory, deleteCategory } from "./actions";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function KategoriPage({
   searchParams,
@@ -93,6 +94,15 @@ export default async function KategoriPage({
                 >
                   {active ? "● Aktif" : "○ Nonaktif"}
                 </button>
+              </form>
+              <form action={deleteCategory}>
+                <input type="hidden" name="id" value={id} />
+                <ConfirmButton
+                  message={`Hapus kategori "${titleCase(c.name as string)}"? Produk di dalamnya akan jadi tanpa kategori (masuk "Lainnya").`}
+                  className="border border-red-300 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+                >
+                  Hapus
+                </ConfirmButton>
               </form>
             </div>
           );
