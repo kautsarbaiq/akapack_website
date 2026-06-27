@@ -218,6 +218,24 @@ export async function fetchProductImageSamples(
   }
 }
 
+/** Produk aktif yang BERFOTO (kartu lengkap) — untuk etalase per kategori di beranda. */
+export async function fetchProductsWithImages(limit = 400): Promise<Product[]> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("products")
+      .select(PUBLIC_PRODUCT_COLUMNS)
+      .eq("is_active", true)
+      .not("image_url", "is", null)
+      .order("updated_at", { ascending: false })
+      .limit(limit);
+    if (error) return [];
+    return (data ?? []).map(normalizeProduct);
+  } catch {
+    return [];
+  }
+}
+
 /** Stok per cabang untuk sekumpulan produk → map productId -> {bandung, garut, total}. */
 export async function fetchStockFor(
   productIds: string[],

@@ -4,7 +4,7 @@ import {
   fetchCategories,
   fetchCategoryCounts,
   fetchGroupSettings,
-  fetchProductImageSamples,
+  fetchProductsWithImages,
   fetchProductsPage,
   fetchStockFor,
 } from "@/lib/catalog";
@@ -32,23 +32,27 @@ const FEATURES: [string, string][] = [
 ];
 
 export default async function Home() {
-  const [categories, { byCategory, total }, featured, groupSettings, imgSamples] = await Promise.all([
+  const [categories, { byCategory, total }, featured, groupSettings, withImages] = await Promise.all([
     fetchCategories(),
     fetchCategoryCounts(),
     fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
     fetchGroupSettings(),
-    fetchProductImageSamples(),
+    fetchProductsWithImages(500),
   ]);
   const groups = buildCategoryGroups(categories);
   const groupCounts = countByGroup(categories, byCategory);
 
-  // Foto perwakilan tiap grup (otomatis dari produk berfoto) bila belum diatur manual.
+  // Bucket produk berfoto per grup → untuk foto kartu kategori + etalase per kategori.
   const catNameById = new Map(categories.map((c) => [c.id, c.name]));
   const groupImg = new Map<string, string>();
-  for (const s of imgSamples) {
-    if (!s.category_id) continue;
-    const slug = groupSlugFor(catNameById.get(s.category_id) ?? "");
-    if (!groupImg.has(slug)) groupImg.set(slug, s.image_url);
+  const byGroup = new Map<string, typeof withImages>();
+  for (const p of withImages) {
+    if (!p.category_id || !p.image_url) continue;
+    const slug = groupSlugFor(catNameById.get(p.category_id) ?? "");
+    if (!groupImg.has(slug)) groupImg.set(slug, p.image_url);
+    const arr = byGroup.get(slug) ?? [];
+    if (arr.length < 6) arr.push(p);
+    byGroup.set(slug, arr);
   }
 
   // Gabung grup dengan pengaturan (foto, urutan, label) dari dashboard.
@@ -67,6 +71,14 @@ export default async function Home() {
     })
     .filter((g) => g.active)
     .sort((a, b) => a.order - b.order);
+
+  // Etalase produk per kategori (gaya ramesia) — grup dgn cukup foto, urut tampil.
+  const featuredGroups = displayGroups
+    .filter((g) => (byGroup.get(g.slug)?.length ?? 0) >= 4)
+    .slice(0, 6);
+  const showcaseStock = await fetchStockFor(
+    featuredGroups.flatMap((g) => (byGroup.get(g.slug) ?? []).map((p) => p.id)),
+  );
 
   // Etalase: utamakan produk berfoto, lengkapi dengan sisanya.
   const pool = featured.products;
@@ -218,6 +230,36 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Etalase produk per kategori (gaya ramesia) */}
+      {featuredGroups.map((g) => {
+        const items = byGroup.get(g.slug) ?? [];
+        return (
+          <section key={g.slug} className="border-t border-line">
+            <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+              <div className="flex items-end justify-between">
+                <h2 className="font-display text-2xl font-medium tracking-tight">{g.label}</h2>
+                <Link
+                  href={`/produk/grup/${g.slug}`}
+                  className="font-mono text-xs text-indigo-ink hover:underline"
+                >
+                  Lihat semua {fmt.format(g.count)} →
+                </Link>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                {items.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    category={p.category_id ? catMap.get(p.category_id) : null}
+                    stock={showcaseStock[p.id]}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       {/* Cara belanja */}
       <div className="border-t border-line">
