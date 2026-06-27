@@ -70,7 +70,7 @@ export default async function EditProduk({ params }: { params: Promise<{ id: str
           </div>
           <div>
             <label className={label}>Harga (Rp)</label>
-            <input name="price" type="number" min="0" defaultValue={(p.price as number) ?? 0} className={input} />
+            <input name="price" type="number" min="0" required defaultValue={(p.price as number) ?? 0} className={input} />
           </div>
           <div>
             <label className={label}>Harga online (opsional)</label>

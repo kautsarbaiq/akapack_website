@@ -4,9 +4,20 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { TENANT_ID, OUTLETS } from "@/lib/supabase";
+import { isStaff } from "@/lib/auth";
 
 const BUCKET = "product-images";
 const fail = (msg: string) => redirect(`/dashboard/produk?err=${encodeURIComponent(msg)}`);
+
+/** Pastikan pemanggil adalah karyawan (defense-in-depth, tak hanya andalkan proxy). */
+async function requireStaff(supabase: Awaited<ReturnType<typeof createSupabaseServer>>) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  if (!isStaff(user.email)) redirect("/");
+  return user;
+}
 
 async function uploadImage(
   supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
@@ -53,25 +64,44 @@ function num(v: FormDataEntryValue | null): number {
   return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
 }
 
+/** Harga dari form: null bila kosong/tidak valid (bukan diam-diam jadi 0). */
+function parsePrice(v: FormDataEntryValue | null): number | null {
+  if (v === null) return null;
+  const s = String(v).trim();
+  if (s === "") return null;
+  const n = Number(s);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n);
+}
+
+function revalidateCatalog(id?: string) {
+  revalidatePath("/");
+  revalidatePath("/produk");
+  revalidatePath("/dashboard/produk");
+  if (id) revalidatePath(`/produk/${id}`);
+}
+
 /** Update produk yang sudah ada. */
 export async function updateProduct(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) fail("ID produk kosong.");
 
   const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  await requireStaff(supabase);
+
+  const price = parsePrice(formData.get("price"));
+  if (price === null) fail("Harga wajib diisi dan harus angka ≥ 0.");
+  const priceOnline = parsePrice(formData.get("price_online"));
 
   const patch: Record<string, unknown> = {
     name: String(formData.get("name") || "").trim(),
     description: (String(formData.get("description") || "").trim() || null) as string | null,
     category_id: (String(formData.get("category_id") || "") || null) as string | null,
     unit: (String(formData.get("unit") || "").trim() || null) as string | null,
-    price: Number(formData.get("price")) || 0,
-    price_online: formData.get("price_online") ? Number(formData.get("price_online")) : null,
+    price,
+    price_online: priceOnline && priceOnline > 0 ? priceOnline : null,
     is_active: formData.get("is_active") === "on",
+    updated_at: new Date().toISOString(),
   };
 
   const file = formData.get("image");
@@ -93,8 +123,7 @@ export async function updateProduct(formData: FormData) {
     if (e) fail("Gagal simpan stok Garut: " + e);
   }
 
-  revalidatePath(`/produk/${id}`);
-  revalidatePath("/dashboard/produk");
+  revalidateCatalog(id);
   redirect("/dashboard/produk?saved=1");
 }
 
@@ -104,10 +133,11 @@ export async function createProduct(formData: FormData) {
   if (!name) fail("Nama produk wajib diisi.");
 
   const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const user = await requireStaff(supabase);
+
+  const price = parsePrice(formData.get("price"));
+  if (price === null) fail("Harga wajib diisi dan harus angka ≥ 0.");
+  const priceOnline = parsePrice(formData.get("price_online"));
 
   let image_url: string | null = null;
   const file = formData.get("image");
@@ -131,8 +161,8 @@ export async function createProduct(formData: FormData) {
     description: String(formData.get("description") || "").trim() || null,
     category_id: String(formData.get("category_id") || "") || null,
     unit: String(formData.get("unit") || "").trim() || null,
-    price: Number(formData.get("price")) || 0,
-    price_online: formData.get("price_online") ? Number(formData.get("price_online")) : null,
+    price,
+    price_online: priceOnline && priceOnline > 0 ? priceOnline : null,
     stock: 0,
     is_active: formData.get("is_active") === "on",
     has_variants: false,
@@ -158,7 +188,6 @@ export async function createProduct(formData: FormData) {
     }
   }
 
-  revalidatePath("/produk");
-  revalidatePath("/dashboard/produk");
+  revalidateCatalog();
   redirect("/dashboard/produk?saved=1");
 }
