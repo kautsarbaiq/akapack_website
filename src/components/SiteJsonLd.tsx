@@ -1,6 +1,6 @@
 import { SITE, SITE_URL } from "@/lib/site";
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 /**
  * Structured data global (schema.org) yang dirender sekali di root layout:

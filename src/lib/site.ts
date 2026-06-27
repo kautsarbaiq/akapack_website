@@ -11,7 +11,7 @@ export const SITE = {
       phone: "0821-2101-0050",
       tel: "+6282121010050",
       wa: "6282121010050",
-      hours: "Senin–Sabtu · 08.00–17.00",
+      hours: "Setiap hari · 08.00–17.00",
       role: "Cabang utama",
     },
     {
@@ -23,7 +23,7 @@ export const SITE = {
       phone: "0821-2104-9478",
       tel: "+6282121049478",
       wa: "6282121049478",
-      hours: "Senin–Sabtu · 08.00–17.00",
+      hours: "Setiap hari · 08.00–17.00",
       role: "Cabang",
     },
   ],

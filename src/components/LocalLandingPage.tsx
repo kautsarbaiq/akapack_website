@@ -16,7 +16,7 @@ const CONTENT: Record<
     paras: [
       "Cabang utama kami berada di Jl. Ibrahim Adjie No. 147, Kiaracondong, Bandung — mudah dijangkau dari berbagai penjuru kota. Lebih dari 3.900 produk tersedia dengan harga grosir dan stok yang ditampilkan apa adanya, jadi Anda tahu pasti barang ready sebelum datang.",
       "Kami melayani UMKM kuliner, kafe & kedai minuman, katering, toko kue dan bakery, frozen food, hingga online seller. Mulai dari cup plastik, gelas, sedotan, box makanan, mika, thinwall, paper bag, kantong plastik, sampai mesin sealer dan mixer — semua bisa didapat di satu tempat.",
-      "Belanja bisa langsung di toko (ambil sendiri) atau pesan online lalu kami kirim. Pembayaran transfer atau COD. Butuh bantuan memilih produk atau mesin yang sesuai? Tim kami siap membantu lewat WhatsApp.",
+      "Belanja bisa langsung di toko (ambil sendiri) atau pesan online lalu kami kirim. Pembayaran transfer bank. Butuh bantuan memilih produk atau mesin yang sesuai? Tim kami siap membantu lewat WhatsApp.",
     ],
     areas: "Bandung, Cimahi, Bandung Barat, Soreang, Banjaran, dan sekitarnya",
   },
@@ -26,7 +26,7 @@ const CONTENT: Record<
     paras: [
       "Cabang kami berada di Jl. Cimanuk No. 28, Tarogong Kidul, Garut — lokasi strategis di pusat keramaian. Ribuan produk tersedia dengan harga grosir dan stok nyata yang tersinkron dengan kasir toko.",
       "Cocok untuk UMKM kuliner, katering, kafe, toko kue, frozen food, dan online seller di Garut. Tersedia cup & gelas plastik, sedotan, box makanan, mika, thinwall, paper bag, kantong plastik, hingga mesin sealer dan timbangan.",
-      "Ambil langsung di toko atau pesan online untuk dikirim. Pembayaran transfer atau COD. Konsultasi pemilihan produk maupun mesin bisa lewat WhatsApp kapan saja.",
+      "Ambil langsung di toko atau pesan online untuk dikirim. Pembayaran transfer bank. Konsultasi pemilihan produk maupun mesin bisa lewat WhatsApp kapan saja.",
     ],
     areas: "Garut, Tarogong, Wanaraja, Tasikmalaya, Sumedang, dan sekitarnya",
   },
@@ -63,7 +63,7 @@ export function LocalLandingPage({ city }: { city: CityKey }) {
         areaServed: c.areas,
         openingHoursSpecification: {
           "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
           opens: "08:00",
           closes: "17:00",
         },

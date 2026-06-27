@@ -179,8 +179,8 @@ export default function CheckoutPage() {
           {/* Pembayaran */}
           <fieldset>
             <span className={labelCls}>Metode pembayaran</span>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {([["transfer", "Transfer bank"], ["cod", "COD / bayar di tempat"]] as const).map(([val, lbl]) => (
+            <div className="grid gap-2">
+              {([["transfer", "Transfer bank"]] as const).map(([val, lbl]) => (
                 <label
                   key={val}
                   className={

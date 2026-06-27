@@ -20,7 +20,7 @@ const VALUES: [string, string][] = [
   ["Stok nyata per cabang", "Jumlah stok ditampilkan apa adanya per cabang, tersinkron langsung dengan kasir toko."],
   ["Dua cabang", "Akapack Bandung & Toko Kemasan Garut — ambil sendiri atau minta dikirim."],
   ["Mesin & konsultasi", "Bukan cuma kemasan: kami sediakan mesin pengemas dan bantu pilih lewat WhatsApp."],
-  ["Belanja fleksibel", "Checkout di web atau kirim keranjang langsung ke WhatsApp. Bayar transfer atau COD."],
+  ["Belanja fleksibel", "Checkout di web atau kirim keranjang langsung ke WhatsApp. Pembayaran transfer bank."],
 ];
 
 const SEGMENTS: [string, string][] = [
@@ -35,7 +35,7 @@ const SEGMENTS: [string, string][] = [
 const FAQ: [string, string][] = [
   ["Apakah harus beli banyak (grosir)?", "Tidak wajib. Kamu bisa beli eceran maupun grosir. Untuk pembelian banyak, sebagian produk punya harga grosir bertingkat."],
   ["Bagaimana cara memesan?", "Pilih produk di katalog, tambahkan ke keranjang, lalu checkout di web — atau kirim isi keranjang langsung ke WhatsApp kami."],
-  ["Metode pembayaran apa saja?", "Transfer bank dan COD (bayar di tempat) untuk area tertentu. Detail dikonfirmasi saat pemesanan."],
+  ["Metode pembayaran apa saja?", "Transfer bank. Detail rekening dikonfirmasi saat pemesanan."],
   ["Apakah bisa dikirim?", "Bisa. Ambil sendiri di cabang Bandung atau Garut, atau minta dikirim — ongkir menyesuaikan tujuan."],
   ["Stok yang tampil di web apakah nyata?", "Ya. Jumlah stok per cabang tampil apa adanya dan tersinkron dengan kasir toko."],
   ["Apakah Akapack menjual mesin pengemas?", "Ya, kami sediakan mesin pengemas (sealer dan lainnya) plus bantu konsultasi memilih yang sesuai kebutuhan."],
@@ -139,7 +139,7 @@ export default async function TentangPage() {
             [fmt.format(total), "Produk aktif"],
             [String(categories.length), "Kategori"],
             ["2", "Cabang"],
-            ["08–17", "Senin–Sabtu"],
+            ["08–17", "Setiap hari"],
           ].map(([n, l]) => (
             <div key={l} className="bg-paper-2 px-6 py-10 text-center">
               <div className="font-display text-4xl font-medium">{n}</div>

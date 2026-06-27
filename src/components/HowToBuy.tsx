@@ -3,7 +3,7 @@ import Link from "next/link";
 const STEPS: [string, string][] = [
   ["Pilih produk", "Telusuri katalog atau cari nama/SKU, lalu tambahkan ke keranjang."],
   ["Checkout atau WhatsApp", "Isi data pesanan di web, atau kirim isi keranjang langsung via WhatsApp."],
-  ["Ambil atau dikirim", "Ambil di cabang terdekat atau minta dikirim. Bayar transfer atau COD."],
+  ["Ambil atau dikirim", "Ambil di cabang terdekat atau minta dikirim. Bayar transfer bank."],
 ];
 
 /** Tiga langkah belanja — dipakai di beranda & halaman Tentang. */
