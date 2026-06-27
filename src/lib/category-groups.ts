@@ -12,16 +12,29 @@ export interface CategoryGroupDef {
   patterns: RegExp;
 }
 
+// Urutan = urutan tampil di beranda (arahan ibu, 2026-06-27). Pola dibuat
+// SPESIFIK agar tiap kategori DB (yang sudah dirapikan) jatuh ke grup yang benar.
 export const CATEGORY_GROUPS: CategoryGroupDef[] = [
-  { slug: "mesin", label: "Mesin & Alat", patterns: /mesin|spare ?part|sperpart|timbangan|elektronik|^service$/i },
-  { slug: "baking", label: "Baking & Dapur", patterns: /baking|cupcake|cup cake|loyang|cetakan|tatakan|spatula|silikon|tusuk gigi|saringan|mangkok|piring|sendok|garpu|pisau|^nasi$|kitchen|kicthen/i },
-  { slug: "cup", label: "Cup, Gelas & Tutup", patterns: /cup|gelas|sedotan|jellycup|\blid\b|tutup/i },
-  { slug: "botol", label: "Botol, Toples & Jar", patterns: /botol|toples|\bjar\b|tabung/i },
-  { slug: "box", label: "Box, Mika & Tray", patterns: /box|mika|tray|thinwall|\bdus\b|bento|foam/i },
-  { slug: "plastik", label: "Plastik & Kantong", patterns: /kresek|keresek|kantong|plastik|wrap|polynett|sarung tangan|jas hujan|bubble|karung|segel/i },
-  { slug: "kertas", label: "Kertas & Cetak", patterns: /paper|kertas|amplop|kraft|sleeve|stiker|pita|cetak|drip bag/i },
-  { slug: "pangan", label: "Bahan & Pangan", patterns: /anti tengik|bumbu|kadar gula|makanan|minuman|sauce/i },
-  { slug: "kemasan", label: "Kemasan Lain", patterns: /kemasan/i },
+  { slug: "flexibel", label: "Kemasan Flexibel (Pouch, Sachet)", patterns: /flexibel|standing pouch|gusset|sachet|kemasan flexi|one layer|drip bag/i },
+  { slug: "botol", label: "Botol, Toples & Tabung Plastik", patterns: /botol|& tabung plastik|jar & tabung|tumbler/i },
+  { slug: "cup", label: "Cup & Gelas Plastik", patterns: /cup gelas plastik|jellycup|jelly cup|sedotan|lid plastik/i },
+  { slug: "thinwall", label: "Wadah Thinwall", patterns: /thinwall|thin wall/i },
+  { slug: "toples-kue", label: "Toples Kue Kering", patterns: /kue kering|cookies/i },
+  { slug: "tray", label: "Tray Plastik (Puding, Cake)", patterns: /\btray\b|mochi|puding|cool box/i },
+  { slug: "bento", label: "Bento / Kotak Makan", patterns: /bento|kotak makan/i },
+  { slug: "sendok", label: "Sendok, Garpu, Sumpit", patterns: /sendok|garpu|sumpit|pisau plastik|tusuk gigi/i },
+  { slug: "kaleng", label: "Kemasan Kaleng", patterns: /kemasan kaleng/i },
+  { slug: "aluma", label: "Tabung Aluma / Composite", patterns: /aluma|composite|cetak kemasan aluma/i },
+  { slug: "bambu", label: "Produk Bambu", patterns: /bambu|anyaman/i },
+  { slug: "papercup", label: "Gelas Paper Cup", patterns: /papper cup|paper cup|gelas papper/i },
+  { slug: "paperbox", label: "Paper Box (Kraft, Ivory)", patterns: /papper box|paper box|kraft|ivory|corrugat|paper rice|\bdus\b|popcorn/i },
+  { slug: "tas", label: "Tas Woven & Shopping Bag", patterns: /tas woven|woven|shoping bag|shopping bag/i },
+  { slug: "kantong", label: "Kantong Plastik & Kresek", patterns: /kantong plastik|kresek|keresek|polymailer|sarung tangan|jas hujan|polynett|foamnett|bubble|segel|lakban|wraping|^plastik$|paper ?bag/i },
+  { slug: "alufoil", label: "Wadah Alu Foil", patterns: /aluminium foil|alu foil|alufoil|cup aluminium/i },
+  { slug: "mesin", label: "Aneka Mesin Packaging & Prosesing", patterns: /mesin|sperpart|spare ?part|timbangan|^service$|elektronik/i },
+  { slug: "baker", label: "Pendukung Baking (Loyang, dll)", patterns: /loyang|cup ?cake|cupcake|spatula|silikon|tatakan|saringan|kitchen|kicthen|mangkok|piring|baking|spuit/i },
+  { slug: "bumbu", label: "Bumbu Tabur / Seasoning", patterns: /bumbu|seasoning|tabur|anti tengik|kadar gula|sauce/i },
+  { slug: "ompreng", label: "Ompreng Stainless", patterns: /ompreng|5 partisi|stainless/i },
 ];
 
 export const OTHER_GROUP = { slug: "lainnya", label: "Lainnya" };

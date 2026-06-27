@@ -4,10 +4,16 @@ import {
   fetchCategories,
   fetchCategoryCounts,
   fetchGroupSettings,
+  fetchProductImageSamples,
   fetchProductsPage,
   fetchStockFor,
 } from "@/lib/catalog";
-import { buildCategoryGroups, countByGroup, groupDefaultOrder } from "@/lib/category-groups";
+import {
+  buildCategoryGroups,
+  countByGroup,
+  groupDefaultOrder,
+  groupSlugFor,
+} from "@/lib/category-groups";
 import { monogram } from "@/lib/format";
 import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
 import { ProductCard } from "@/components/ProductCard";
@@ -26,14 +32,24 @@ const FEATURES: [string, string][] = [
 ];
 
 export default async function Home() {
-  const [categories, { byCategory, total }, featured, groupSettings] = await Promise.all([
+  const [categories, { byCategory, total }, featured, groupSettings, imgSamples] = await Promise.all([
     fetchCategories(),
     fetchCategoryCounts(),
     fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
     fetchGroupSettings(),
+    fetchProductImageSamples(),
   ]);
   const groups = buildCategoryGroups(categories);
   const groupCounts = countByGroup(categories, byCategory);
+
+  // Foto perwakilan tiap grup (otomatis dari produk berfoto) bila belum diatur manual.
+  const catNameById = new Map(categories.map((c) => [c.id, c.name]));
+  const groupImg = new Map<string, string>();
+  for (const s of imgSamples) {
+    if (!s.category_id) continue;
+    const slug = groupSlugFor(catNameById.get(s.category_id) ?? "");
+    if (!groupImg.has(slug)) groupImg.set(slug, s.image_url);
+  }
 
   // Gabung grup dengan pengaturan (foto, urutan, label) dari dashboard.
   const displayGroups = groups
@@ -43,7 +59,7 @@ export default async function Home() {
         slug: g.slug,
         label: s?.label || g.label,
         color: g.categories[0]?.color || "#4f46e5",
-        image: s?.image_url || null,
+        image: s?.image_url || groupImg.get(g.slug) || null,
         count: groupCounts.get(g.slug) ?? 0,
         order: s?.sort_order ?? groupDefaultOrder(g.slug),
         active: s?.is_active ?? true,
@@ -102,7 +118,7 @@ export default async function Home() {
               ["Produk", fmt.format(total)],
               ["Kategori", String(categories.length)],
               ["Cabang", "Bandung & Garut"],
-              ["Pembayaran", "Transfer · COD"],
+              ["Pembayaran", "Transfer"],
             ].map(([k, v], i) => (
               <div
                 key={k}

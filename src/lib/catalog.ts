@@ -196,6 +196,28 @@ export async function fetchGroupSettings(): Promise<Map<string, GroupSetting>> {
   return map;
 }
 
+/**
+ * Sampel (category_id, image_url) produk berfoto — untuk memilih foto perwakilan
+ * tiap grup di beranda secara otomatis bila belum diatur manual.
+ */
+export async function fetchProductImageSamples(
+  limit = 1500,
+): Promise<{ category_id: string | null; image_url: string }[]> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("products")
+      .select("category_id,image_url")
+      .eq("is_active", true)
+      .not("image_url", "is", null)
+      .limit(limit);
+    if (error) return [];
+    return (data ?? []) as { category_id: string | null; image_url: string }[];
+  } catch {
+    return [];
+  }
+}
+
 /** Stok per cabang untuk sekumpulan produk → map productId -> {bandung, garut, total}. */
 export async function fetchStockFor(
   productIds: string[],
