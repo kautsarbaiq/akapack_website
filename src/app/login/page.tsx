@@ -8,7 +8,9 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/";
+  // Default ke /dashboard: karyawan langsung masuk; pembeli otomatis dipantulkan
+  // ke beranda oleh proxy (karena bukan staf).
+  const next = params.get("next") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

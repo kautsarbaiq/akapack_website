@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { OUTLETS } from "@/lib/supabase";
+import { fetchStockFor } from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
 import { updateProduct } from "../actions";
 
@@ -18,9 +18,8 @@ export default async function EditProduk({ params }: { params: Promise<{ id: str
   const cats = await supabase.from("categories").select("id,name").order("name");
   const categories = cats.data ?? [];
 
-  const inv = await supabase.from("inventory").select("outlet_id,stock").eq("product_id", id);
-  const stockOf = (oid: string) =>
-    ((inv.data ?? []).find((r) => r.outlet_id === oid)?.stock as number | undefined) ?? 0;
+  const stockMap = await fetchStockFor([id]);
+  const st = stockMap[id] ?? { bandung: 0, garut: 0, total: 0 };
 
   const label = "font-mono text-xs uppercase tracking-[0.1em] text-ink-soft";
   const input =
@@ -89,7 +88,7 @@ export default async function EditProduk({ params }: { params: Promise<{ id: str
               name="stock_bandung"
               type="number"
               min="0"
-              defaultValue={stockOf(OUTLETS.bandung)}
+              defaultValue={st.bandung}
               className={input}
             />
           </div>
@@ -99,7 +98,7 @@ export default async function EditProduk({ params }: { params: Promise<{ id: str
               name="stock_garut"
               type="number"
               min="0"
-              defaultValue={stockOf(OUTLETS.garut)}
+              defaultValue={st.garut}
               className={input}
             />
           </div>
