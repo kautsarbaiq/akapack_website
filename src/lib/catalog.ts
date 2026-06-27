@@ -227,6 +227,7 @@ export async function fetchProductsWithImages(limit = 400): Promise<Product[]> {
       .select(PUBLIC_PRODUCT_COLUMNS)
       .eq("is_active", true)
       .not("image_url", "is", null)
+      .neq("image_url", "")
       .order("updated_at", { ascending: false })
       .limit(limit);
     if (error) return [];

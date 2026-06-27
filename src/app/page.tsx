@@ -24,13 +24,6 @@ import { BranchCard } from "@/components/BranchCard";
 // ISR: halaman tetap statis tapi menyegarkan jumlah produk & stok tiap jam.
 export const revalidate = 3600;
 
-const FEATURES: [string, string][] = [
-  ["Harga grosir", "Harga langsung untuk pembelian banyak — tanpa nego panjang."],
-  ["Stok nyata 2 cabang", "Jumlah stok Bandung & Garut tampil apa adanya, sinkron dengan kasir."],
-  ["Katalog lengkap", "Plastik, kertas, box, mika, sampai mesin pengemas dalam satu tempat."],
-  ["Mesin & konsultasi", "Bukan cuma kemasan — kami bantu pilih mesin yang pas via WhatsApp."],
-];
-
 export default async function Home() {
   const [categories, { byCategory, total }, featured, groupSettings, withImages] = await Promise.all([
     fetchCategories(),
@@ -89,6 +82,7 @@ export default async function Home() {
   const stock = await fetchStockFor(showcase.map((p) => p.id));
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const fmt = new Intl.NumberFormat("id-ID");
+  const heroPics = withImages.filter((p) => p.image_url).slice(0, 4);
 
   return (
     <div>
@@ -122,47 +116,42 @@ export default async function Home() {
                 Pesan via WhatsApp
               </a>
             </div>
-          </div>
 
-          {/* Spec sheet ala katalog */}
-          <div className="self-end border border-line bg-card">
-            {[
-              ["Produk", fmt.format(total)],
-              ["Kategori", String(categories.length)],
-              ["Cabang", "Bandung & Garut"],
-              ["Pembayaran", "Transfer"],
-            ].map(([k, v], i) => (
-              <div
-                key={k}
-                className={
-                  "flex items-baseline justify-between px-5 py-4" +
-                  (i > 0 ? " border-t border-line" : "")
-                }
-              >
-                <span className="font-mono text-xs uppercase tracking-[0.1em] text-ink-soft">
-                  {k}
-                </span>
-                <span className="font-display text-xl font-medium">{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Keunggulan */}
-      <section className="border-b border-line bg-paper-2">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map(([t, b], i) => (
-              <div key={t} className="bg-card p-6">
-                <div className="font-mono text-xs text-ink-soft">
-                  {String(i + 1).padStart(2, "0")}
+            {/* Statistik ringkas */}
+            <div className="mt-9 flex flex-wrap gap-x-8 gap-y-3 border-t border-line pt-6">
+              {[
+                [fmt.format(total), "produk"],
+                [String(categories.length), "kategori"],
+                ["2", "cabang · Bandung & Garut"],
+              ].map(([n, l]) => (
+                <div key={l}>
+                  <span className="font-display text-2xl font-medium">{n}</span>{" "}
+                  <span className="font-mono text-xs text-ink-soft">{l}</span>
                 </div>
-                <h3 className="mt-3 font-display text-lg font-medium">{t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{b}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* Kolase foto produk */}
+          {heroPics.length >= 4 ? (
+            <div className="grid grid-cols-2 gap-2 self-center">
+              {heroPics.map((p) => (
+                <div
+                  key={p.id}
+                  className="relative aspect-square overflow-hidden border border-line bg-card"
+                >
+                  <Image
+                    src={p.image_url as string}
+                    alt={p.name}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 45vw, 22vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
