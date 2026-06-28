@@ -7,9 +7,12 @@
   --color-ink: #1a1916;
   --color-ink-soft: #6f6e66;
   --color-line: #e0d9c8;
-  --color-indigo: #4f46e5;
-  --color-indigo-ink: #3730a3;
-  --color-indigo-wash: #ecebfb;
+  /* Aksen utama brand: oranye (dulu indigo). Nama variabel dipertahankan agar
+     kelas yang sudah ada (bg-indigo, text-indigo-ink, bg-indigo-wash) ikut berubah. */
+  --color-indigo: #ea580c;
+  --color-indigo-ink: #c2410c;
+  --color-indigo-wash: #fff1e6;
+  --color-orange: #ea580c;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
