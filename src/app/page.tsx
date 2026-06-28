@@ -10,6 +10,7 @@ import {
   fetchStockFor,
 } from "@/lib/catalog";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { PhotoMarquee } from "@/components/PhotoMarquee";
 import {
   buildCategoryGroups,
   countByGroup,
@@ -33,7 +34,7 @@ export default async function Home() {
       fetchCategoryCounts(),
       fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
       fetchGroupSettings(),
-      fetchProductsWithImages(500),
+      fetchProductsWithImages(1500),
       fetchBanners(),
     ]);
   const groups = buildCategoryGroups(categories);
@@ -48,7 +49,7 @@ export default async function Home() {
     const slug = groupSlugFor(catNameById.get(p.category_id) ?? "");
     if (!groupImg.has(slug)) groupImg.set(slug, p.image_url);
     const arr = byGroup.get(slug) ?? [];
-    if (arr.length < 6) arr.push(p);
+    if (arr.length < 12) arr.push(p);
     byGroup.set(slug, arr);
   }
 
@@ -72,17 +73,26 @@ export default async function Home() {
   // Etalase produk per kategori (gaya ramesia) — grup dgn cukup foto, urut tampil.
   const featuredGroups = displayGroups
     .filter((g) => (byGroup.get(g.slug)?.length ?? 0) >= 4)
-    .slice(0, 6);
+    .slice(0, 10);
   const showcaseStock = await fetchStockFor(
     featuredGroups.flatMap((g) => (byGroup.get(g.slug) ?? []).map((p) => p.id)),
   );
+
+  // Pita foto produk (marquee) — satu foto per kategori berfoto, untuk kesan "banyak gambar".
+  const marqueePics = displayGroups
+    .map((g) => {
+      const src = groupImg.get(g.slug);
+      return src ? { src, label: g.label, href: `/produk/grup/${g.slug}` } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .slice(0, 18);
 
   // Etalase: utamakan produk berfoto, lengkapi dengan sisanya.
   const pool = featured.products;
   const showcase = [
     ...pool.filter((p) => p.image_url),
     ...pool.filter((p) => !p.image_url),
-  ].slice(0, 8);
+  ].slice(0, 12);
   const stock = await fetchStockFor(showcase.map((p) => p.id));
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const fmt = new Intl.NumberFormat("id-ID");
@@ -159,6 +169,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Pita foto produk berjalan */}
+      <PhotoMarquee pics={marqueePics} />
 
       {/* Kategori unggulan */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

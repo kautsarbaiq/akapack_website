@@ -42,3 +42,24 @@ body {
 .thin-scroll::-webkit-scrollbar-thumb {
   background: var(--color-line);
 }
+
+/* Marquee foto produk (jalan terus, jeda saat hover). */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 50s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
