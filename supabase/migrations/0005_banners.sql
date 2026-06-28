@@ -18,3 +18,4 @@ create policy "write banners" on public.banners for all to authenticated using (
 
 grant select on public.banners to anon;
 grant select, insert, update, delete on public.banners to authenticated;
+grant select, insert, update, delete on public.banners to service_role;
