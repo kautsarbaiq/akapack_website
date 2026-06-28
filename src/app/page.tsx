@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
+  fetchBanners,
   fetchCategories,
   fetchCategoryCounts,
   fetchGroupSettings,
@@ -8,6 +9,7 @@ import {
   fetchProductsPage,
   fetchStockFor,
 } from "@/lib/catalog";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import {
   buildCategoryGroups,
   countByGroup,
@@ -25,13 +27,15 @@ import { BranchCard } from "@/components/BranchCard";
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [categories, { byCategory, total }, featured, groupSettings, withImages] = await Promise.all([
-    fetchCategories(),
-    fetchCategoryCounts(),
-    fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
-    fetchGroupSettings(),
-    fetchProductsWithImages(500),
-  ]);
+  const [categories, { byCategory, total }, featured, groupSettings, withImages, banners] =
+    await Promise.all([
+      fetchCategories(),
+      fetchCategoryCounts(),
+      fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
+      fetchGroupSettings(),
+      fetchProductsWithImages(500),
+      fetchBanners(),
+    ]);
   const groups = buildCategoryGroups(categories);
   const groupCounts = countByGroup(categories, byCategory);
 
@@ -82,25 +86,49 @@ export default async function Home() {
   const stock = await fetchStockFor(showcase.map((p) => p.id));
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const fmt = new Intl.NumberFormat("id-ID");
-  const heroPics = withImages.filter((p) => p.image_url).slice(0, 4);
 
   return (
     <div>
-      {/* Hero */}
-      <section className="border-b border-line">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.5fr_1fr] lg:py-24">
-          <div>
-            <div className="font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
+      {/* Banner hero (full-width, geser + auto-scroll). Diisi via Dashboard → Banner. */}
+      {banners.length > 0 ? (
+        <HeroCarousel slides={banners} />
+      ) : (
+        <section className="bg-ink text-white">
+          <div className="mx-auto flex min-h-[240px] max-w-6xl flex-col items-start justify-center gap-4 px-4 py-14 sm:min-h-[360px] sm:px-6">
+            <div className="font-mono text-xs uppercase tracking-[0.2em] text-orange">
               Grosir kemasan &amp; mesin · Bandung — Garut
             </div>
-            <h1 className="mt-5 font-display text-5xl font-medium leading-[1.02] tracking-tight sm:text-6xl">
-              Grosir kemasan plastik &amp; mesin pengemas, satu tempat.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-              Lebih dari {fmt.format(total)} produk — plastik, kertas, box, hingga mesin
-              pengemas. Harga grosir, stok nyata dari dua cabang.
+            <h2 className="max-w-3xl font-display text-4xl font-medium leading-tight sm:text-5xl">
+              Grosir kemasan plastik &amp; mesin pengemas.
+            </h2>
+            <p className="max-w-xl text-white/70">
+              Poster produk akan tampil di sini — tambahkan lewat Dashboard → Banner.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/produk"
+              className="mt-2 bg-indigo px-6 py-3 text-sm font-medium text-white hover:opacity-90"
+            >
+              Lihat katalog
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Intro */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
+            Grosir kemasan &amp; mesin · Bandung — Garut
+          </div>
+          <h1 className="mt-4 max-w-3xl font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
+            Grosir kemasan plastik &amp; mesin pengemas, satu tempat.
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
+            Lebih dari {fmt.format(total)} produk — plastik, kertas, box, hingga mesin pengemas.
+            Harga grosir, stok nyata dari dua cabang.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/produk"
                 className="bg-indigo px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
@@ -116,13 +144,11 @@ export default async function Home() {
                 Pesan via WhatsApp
               </a>
             </div>
-
-            {/* Statistik ringkas */}
-            <div className="mt-9 flex flex-wrap gap-x-8 gap-y-3 border-t border-line pt-6">
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               {[
                 [fmt.format(total), "produk"],
                 [String(categories.length), "kategori"],
-                ["2", "cabang · Bandung & Garut"],
+                ["2", "cabang"],
               ].map(([n, l]) => (
                 <div key={l}>
                   <span className="font-display text-2xl font-medium">{n}</span>{" "}
@@ -131,27 +157,6 @@ export default async function Home() {
               ))}
             </div>
           </div>
-
-          {/* Kolase foto produk */}
-          {heroPics.length >= 4 ? (
-            <div className="grid grid-cols-2 gap-2 self-center">
-              {heroPics.map((p) => (
-                <div
-                  key={p.id}
-                  className="relative aspect-square overflow-hidden border border-line bg-card"
-                >
-                  <Image
-                    src={p.image_url as string}
-                    alt={p.name}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 45vw, 22vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : null}
         </div>
       </section>
 

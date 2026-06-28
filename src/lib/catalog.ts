@@ -218,6 +218,30 @@ export async function fetchProductImageSamples(
   }
 }
 
+export interface Banner {
+  id: string;
+  image_url: string;
+  link: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+/** Banner/poster hero beranda (aktif, urut). Aman bila tabel belum ada (migrasi 0005). */
+export async function fetchBanners(): Promise<Banner[]> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("banners")
+      .select("id,image_url,link,sort_order,is_active")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) return [];
+    return (data ?? []) as Banner[];
+  } catch {
+    return [];
+  }
+}
+
 /** Produk aktif yang BERFOTO (kartu lengkap) — untuk etalase per kategori di beranda. */
 export async function fetchProductsWithImages(limit = 400): Promise<Product[]> {
   try {

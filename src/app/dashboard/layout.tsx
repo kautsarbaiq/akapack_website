@@ -28,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Link href="/dashboard/produk" className="text-ink-soft hover:text-ink">Produk</Link>
               <Link href="/dashboard/kategori" className="text-ink-soft hover:text-ink">Kategori</Link>
               <Link href="/dashboard/grup" className="text-ink-soft hover:text-ink">Kartu Beranda</Link>
+              <Link href="/dashboard/banner" className="text-ink-soft hover:text-ink">Banner</Link>
               <Link href="/dashboard/pesanan" className="text-ink-soft hover:text-ink">Pesanan</Link>
               <Link href="/" className="text-ink-soft hover:text-ink">Lihat situs ↗</Link>
             </nav>
