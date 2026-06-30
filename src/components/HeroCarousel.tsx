@@ -44,7 +44,7 @@ export function HeroCarousel({ slides }: { slides: Banner[] }) {
             className="relative aspect-[5/2] max-h-[680px] w-full shrink-0 snap-start"
           >
             {s.link ? (
-              <Link href={s.link} className="block h-full w-full">
+              <Link href={s.link} className="relative block h-full w-full">
                 <Image src={s.image_url} alt="" fill priority sizes="100vw" className="object-cover" />
               </Link>
             ) : (
