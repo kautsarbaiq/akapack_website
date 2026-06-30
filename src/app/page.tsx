@@ -104,7 +104,7 @@ export default async function Home() {
         <HeroCarousel slides={banners} />
       ) : (
         <section className="bg-ink text-white">
-          <div className="mx-auto flex min-h-[240px] max-w-6xl flex-col items-start justify-center gap-4 px-4 py-14 sm:min-h-[360px] sm:px-6">
+          <div className="mx-auto flex min-h-[300px] max-w-6xl flex-col items-start justify-center gap-4 px-4 py-14 sm:min-h-[460px] sm:px-6 lg:min-h-[580px]">
             <div className="font-mono text-xs uppercase tracking-[0.2em] text-orange">
               Grosir kemasan &amp; mesin · Bandung — Garut
             </div>
