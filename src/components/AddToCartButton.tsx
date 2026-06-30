@@ -24,7 +24,7 @@ export function AddToCartButton({ item, qty = 1, className, label = "+ Keranjang
       }}
       className={
         className ??
-        "flex-1 bg-indigo px-3 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
+        "flex-1 rounded-lg bg-indigo px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
       }
     >
       {added ? "✓ Ditambahkan" : label}

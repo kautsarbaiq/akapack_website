@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f4f1e9;
-  --color-paper-2: #ebe6d8;
-  --color-card: #fbfaf6;
+  /* Palet retail (gaya marketplace ruparupa): latar abu terang, kartu putih,
+     garis sejuk — tetap pakai brand oranye + hitam sebagai aksen. */
+  --color-paper: #f4f5f7;
+  --color-paper-2: #eaecef;
+  --color-card: #ffffff;
   --color-ink: #1a1916;
-  --color-ink-soft: #6f6e66;
-  --color-line: #e0d9c8;
+  --color-ink-soft: #6b7280;
+  --color-line: #e6e7eb;
   /* Aksen utama brand: oranye (dulu indigo). Nama variabel dipertahankan agar
      kelas yang sudah ada (bg-indigo, text-indigo-ink, bg-indigo-wash) ikut berubah. */
   --color-indigo: #ea580c;
   --color-indigo-ink: #c2410c;
   --color-indigo-wash: #fff1e6;
   --color-orange: #ea580c;
+  /* Aksen e-commerce: merah diskon/promo, hijau stok. */
+  --color-discount: #e11d48;
+  --color-discount-wash: #ffe4e6;
+  --color-success: #16a34a;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
@@ -62,4 +68,21 @@ body {
   .animate-marquee {
     animation: none;
   }
+}
+
+/* Rail produk horizontal: sembunyikan scrollbar tapi tetap bisa digeser. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bayangan lembut kartu produk (gaya marketplace). */
+.shadow-card {
+  box-shadow: 0 1px 2px rgba(16, 15, 13, 0.04), 0 1px 3px rgba(16, 15, 13, 0.06);
+}
+.shadow-card-hover {
+  box-shadow: 0 6px 16px rgba(16, 15, 13, 0.1), 0 2px 6px rgba(16, 15, 13, 0.06);
 }

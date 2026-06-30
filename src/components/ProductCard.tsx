@@ -13,101 +13,114 @@ interface Props {
 }
 
 export function ProductCard({ product, category, stock }: Props) {
-  const color = category?.color || "#4f46e5";
+  const color = category?.color || "#ea580c";
   const hasStock = stock && stock.total > 0;
   const hasTiers = product.price_tiers.length > 0;
   const href = `/produk/${product.id}`;
+
+  const price = displayPrice(product);
+  const discounted =
+    product.price_online != null && product.price > 0 && product.price_online < product.price;
+  const off = discounted ? Math.round((1 - product.price_online! / product.price) * 100) : 0;
 
   const cartItem = {
     id: product.id,
     name: product.name,
     sku: product.sku,
     unit: product.unit,
-    price: displayPrice(product),
+    price,
     image_url: product.image_url,
     color: category?.color ?? null,
   };
 
   return (
-    <article className="group flex flex-col border border-line bg-card transition-colors hover:border-ink/25">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-line bg-card shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover">
       <Link href={href} className="block">
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-square overflow-hidden bg-paper-2">
           {product.image_url ? (
             <Image
               src={product.image_url}
               alt={`${product.name}${category ? " — " + titleCase(category.name) : ""} · grosir kemasan Akapack`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="absolute inset-0" style={{ backgroundColor: color }}>
               <span
-                className="absolute -right-1 top-1 font-mono text-[64px] font-medium leading-none"
+                className="absolute -right-1 top-1 font-display text-[64px] font-bold leading-none"
                 style={{ color: "rgba(255,255,255,0.32)" }}
                 aria-hidden="true"
               >
                 {monogram(product.name)}
               </span>
               {category && (
-                <span className="absolute bottom-2 left-2 right-2 font-mono text-[10px] uppercase tracking-[0.1em] text-white/90">
+                <span className="absolute bottom-2 left-2 right-2 text-[10px] font-medium uppercase tracking-[0.08em] text-white/90">
                   {titleCase(category.name)}
                 </span>
               )}
             </div>
           )}
-          {product.sku && (
-            <span className="absolute left-2 top-2 bg-white/85 px-1.5 py-0.5 font-mono text-[10px] tracking-[0.04em] text-ink">
-              {product.sku}
+          {discounted && (
+            <span className="absolute left-0 top-2 rounded-r-md bg-discount px-1.5 py-0.5 text-[11px] font-bold text-white shadow-sm">
+              -{off}%
+            </span>
+          )}
+          {hasTiers && (
+            <span className="absolute right-2 top-2 rounded-md bg-indigo px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+              Grosir
             </span>
           )}
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
+      <div className="flex flex-1 flex-col gap-1.5 p-3">
         <Link href={href}>
-          <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug transition-colors group-hover:text-indigo-ink">
+          <h3 className="line-clamp-2 min-h-[2.4rem] text-[13px] font-medium leading-snug text-ink transition-colors group-hover:text-indigo-ink">
             {product.name}
           </h3>
         </Link>
 
-        <div className="font-mono text-xs text-ink-soft">per {product.unit ?? "pcs"}</div>
-
-        <div className="text-lg font-medium tracking-tight">
-          {formatRupiah(displayPrice(product))}
-        </div>
-
-        {hasTiers && (
-          <span className="w-fit bg-indigo-wash px-1.5 py-0.5 font-mono text-[10px] text-indigo-ink">
-            harga grosir tersedia
-          </span>
-        )}
-
-        <div className="mt-auto border-t border-dashed border-line pt-2 font-mono text-[11px]">
-          {hasStock ? (
-            <span className="flex flex-wrap gap-x-3 text-ink-soft">
-              <span>
-                <b className="font-medium text-ink">{stock.bandung}</b> Bandung
-              </span>
-              <span>
-                <b className="font-medium text-ink">{stock.garut}</b> Garut
-              </span>
+        <div className="mt-0.5">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base font-extrabold tracking-tight text-ink">
+              {formatRupiah(price)}
             </span>
-          ) : (
-            <span className="text-indigo-ink">Inden · tanya stok</span>
+            <span className="text-[11px] text-ink-soft">/ {product.unit ?? "pcs"}</span>
+          </div>
+          {discounted && (
+            <span className="text-[11px] text-ink-soft line-through">
+              {formatRupiah(product.price)}
+            </span>
           )}
         </div>
 
-        <div className="flex gap-2 pt-1">
+        <div className="mt-auto flex items-center gap-1.5 pt-1 text-[11px]">
+          {hasStock ? (
+            <span className="inline-flex items-center gap-1 font-medium text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              Stok ada
+            </span>
+          ) : (
+            <span className="font-medium text-indigo-ink">Inden · tanya stok</span>
+          )}
+          {hasStock && (
+            <span className="truncate text-ink-soft">
+              · {stock.bandung} Bdg / {stock.garut} Grt
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-2 pt-1.5">
           <AddToCartButton item={cartItem} />
           <a
             href={waLink(WA_PRIMARY, productInquiryText(product))}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Tanya via WhatsApp"
-            className="flex h-8 w-8 items-center justify-center border border-line text-ink transition-colors hover:border-ink/30"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-success transition-colors hover:border-success/40 hover:bg-success/5"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z"
                 stroke="currentColor"

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 const CLS =
-  "border border-line bg-card px-3 py-2 text-sm text-ink-soft transition-colors hover:border-ink/30 hover:text-ink";
+  "rounded-lg border border-indigo/40 bg-card px-3.5 py-2 text-sm font-medium text-indigo-ink transition-colors hover:bg-indigo-wash";
 
 /** Tombol Masuk (belum login) / Keluar (sudah login) di header situs. */
 export function AuthButton() {
