@@ -159,14 +159,14 @@ export default async function ProdukPage({
         />
       )}
       {/* Heading */}
-      <div className="mb-1 font-mono text-xs uppercase tracking-[0.16em] text-ink-soft">
+      <div className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-ink">
         Katalog
       </div>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
+        <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
           {heading}
         </h1>
-        <p className="font-mono text-xs text-ink-soft">
+        <p className="text-sm text-ink-soft">
           {fmt.format(result.total)} produk
         </p>
       </div>

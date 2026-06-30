@@ -99,17 +99,17 @@ export default async function GrupPage({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <nav className="font-mono text-xs text-ink-soft" aria-label="Breadcrumb">
-        <Link href="/" className="hover:text-ink">Beranda</Link>
+      <nav className="text-xs text-ink-soft" aria-label="Breadcrumb">
+        <Link href="/" className="hover:text-indigo-ink">Beranda</Link>
         <span className="px-1.5">/</span>
-        <Link href="/produk" className="hover:text-ink">Katalog</Link>
+        <Link href="/produk" className="hover:text-indigo-ink">Katalog</Link>
         <span className="px-1.5">/</span>
-        <span className="text-ink">{seo.h1}</span>
+        <span className="font-medium text-ink">{seo.h1}</span>
       </nav>
 
-      <h1 className="mt-5 font-display text-3xl font-medium tracking-tight sm:text-4xl">{seo.h1}</h1>
+      <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{seo.h1}</h1>
       <p className="mt-4 max-w-3xl leading-relaxed text-ink-soft">{seo.intro}</p>
-      <p className="mt-3 font-mono text-xs text-ink-soft">{fmt.format(result.total)} produk</p>
+      <p className="mt-3 text-sm text-ink-soft">{fmt.format(result.total)} produk</p>
 
       {/* Sub-kategori dalam grup */}
       {group && group.categories.length > 1 && (
@@ -118,7 +118,7 @@ export default async function GrupPage({ params }: { params: Promise<{ slug: str
             <Link
               key={c.id}
               href={`/produk?kategori=${c.id}`}
-              className="border border-line bg-card px-3 py-1.5 font-mono text-xs text-ink-soft transition-colors hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-line bg-card px-3.5 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-indigo/40 hover:text-indigo-ink"
             >
               {titleCase(c.name)}
             </Link>
@@ -147,7 +147,7 @@ export default async function GrupPage({ params }: { params: Promise<{ slug: str
             <div className="mt-8 text-center">
               <Link
                 href={`/produk?grup=${slug}`}
-                className="inline-block bg-indigo px-6 py-3 text-sm font-medium text-white hover:opacity-90"
+                className="inline-block rounded-full bg-indigo px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
               >
                 Lihat semua {fmt.format(result.total)} produk →
               </Link>

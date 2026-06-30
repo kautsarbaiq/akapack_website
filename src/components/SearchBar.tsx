@@ -21,7 +21,7 @@ export function SearchBar({ initial, kategori, grup = null, sort }: Props) {
         e.preventDefault();
         router.push(catalogHref({ q: value.trim() || null, kategori, grup, sort }));
       }}
-      className="flex w-full items-center border border-line bg-card focus-within:border-ink/40 sm:w-80"
+      className="flex w-full items-center overflow-hidden rounded-full border border-line bg-card focus-within:border-indigo/50 sm:w-96"
       role="search"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="ml-3 text-ink-soft">
@@ -48,7 +48,7 @@ export function SearchBar({ initial, kategori, grup = null, sort }: Props) {
           ×
         </button>
       )}
-      <button type="submit" className="border-l border-line px-3 py-2 font-mono text-xs text-ink hover:bg-paper-2">
+      <button type="submit" className="m-0.5 rounded-full bg-indigo px-4 py-1.5 text-xs font-semibold text-white hover:opacity-90">
         Cari
       </button>
     </form>

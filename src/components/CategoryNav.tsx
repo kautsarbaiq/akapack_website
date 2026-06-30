@@ -11,9 +11,9 @@ interface Props {
   sort: string | null;
 }
 
-const CHIP = "shrink-0 whitespace-nowrap border px-3 py-1.5 font-mono text-xs transition-colors";
-const ON = " border-ink bg-ink text-paper";
-const OFF = " border-line bg-card text-ink-soft hover:border-ink/30 hover:text-ink";
+const CHIP = "shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors";
+const ON = " border-indigo bg-indigo text-white";
+const OFF = " border-line bg-card text-ink-soft hover:border-indigo/40 hover:text-indigo-ink";
 
 export function CategoryNav({ groups, activeGroup, activeCategoryId, q, sort }: Props) {
   const current = groups.find((g) => g.slug === activeGroup);
@@ -52,8 +52,8 @@ export function CategoryNav({ groups, activeGroup, activeCategoryId, q, sort }: 
               className={CHIP + (activeCategoryId === c.id ? ON : OFF)}
             >
               <span
-                className="mr-1.5 inline-block h-2 w-2 align-middle"
-                style={{ backgroundColor: c.color || "#4f46e5" }}
+                className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
+                style={{ backgroundColor: c.color || "#ea580c" }}
               />
               {titleCase(c.name)}
             </Link>
