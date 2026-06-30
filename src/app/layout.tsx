@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono, Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 import { SITE_URL } from "@/lib/site";
@@ -19,6 +19,13 @@ const jbmono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jbmono",
   weight: ["400", "500"],
+  display: "swap",
+});
+// Font logo (rounded) — dipakai wordmark "akapack" di BrandLogo.
+const baloo = Baloo_2({
+  subsets: ["latin"],
+  variable: "--font-rounded",
+  weight: ["700", "800"],
   display: "swap",
 });
 
@@ -64,7 +71,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="id"
-      className={`${inter.variable} ${grotesk.variable} ${jbmono.variable} h-full`}
+      className={`${inter.variable} ${grotesk.variable} ${jbmono.variable} ${baloo.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
         <SiteJsonLd />

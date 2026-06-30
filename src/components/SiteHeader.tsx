@@ -16,7 +16,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-paper-2/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" aria-label="Akapack — beranda" className="shrink-0">
-          <BrandLogo className="h-9 w-auto" />
+          <BrandLogo className="h-11 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm md:flex">
