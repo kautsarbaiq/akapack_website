@@ -41,7 +41,7 @@ export function HeroCarousel({ slides }: { slides: Banner[] }) {
         {slides.map((s) => (
           <div
             key={s.id}
-            className="relative h-[300px] w-full shrink-0 snap-start sm:h-[460px] lg:h-[580px]"
+            className="relative aspect-[5/2] max-h-[680px] w-full shrink-0 snap-start"
           >
             {s.link ? (
               <Link href={s.link} className="block h-full w-full">

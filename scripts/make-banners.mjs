@@ -16,7 +16,7 @@ const AUTH = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }; // tulis (
 const READ = { apikey: ANON, Authorization: `Bearer ${ANON}` };       // baca (RLS publik)
 const BUCKET = "product-images";
 
-const W = 1600, H = 600;
+const W = 1600, H = 640; // rasio 5:2 — cocok dgn slide aspect-[5/2] (tanpa crop)
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Tema banner + kata kunci kategori untuk memilih foto produk yang cocok.

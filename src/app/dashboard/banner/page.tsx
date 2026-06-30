@@ -22,8 +22,8 @@ export default async function BannerPage({
     <div className="max-w-3xl">
       <h1 className="font-display text-2xl font-medium tracking-tight">Banner beranda</h1>
       <p className="mt-1 text-ink-soft">
-        Poster yang tampil besar di atas beranda (geser & auto-scroll). Ukuran disarankan lebar,
-        mis. 1600×600px. Urutan kecil tampil duluan.
+        Poster yang tampil besar di atas beranda (geser & auto-scroll). Ukuran disarankan{" "}
+        <strong>1600×640px (rasio 5:2)</strong> supaya pas tanpa terpotong. Urutan kecil tampil duluan.
       </p>
 
       {sp.saved && (
