@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { formatRupiah } from "@/lib/format";
@@ -8,12 +8,34 @@ import { SITE, WA_PRIMARY, waLink } from "@/lib/site";
 import { cartToWhatsAppText } from "@/lib/wa";
 
 type Fulfillment = "pickup" | "delivery";
-type Payment = "transfer" | "cod";
+type Payment = "online" | "transfer";
 
 interface SuccessData {
   orderNumber: string;
   subtotal: number;
+  paid: "paid" | "pending" | "manual";
 }
+
+// Snap.js dari Midtrans (dimuat dinamis bila pembayaran online aktif).
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        cb: {
+          onSuccess?: (r: unknown) => void;
+          onPending?: (r: unknown) => void;
+          onError?: (r: unknown) => void;
+          onClose?: () => void;
+        },
+      ) => void;
+    };
+  }
+}
+
+const MIDTRANS_CLIENT_KEY = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
+const MIDTRANS_PROD = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
+const ONLINE_ENABLED = Boolean(MIDTRANS_CLIENT_KEY);
 
 export default function CheckoutPage() {
   const { items, subtotal, count, hydrated, clear } = useCart();
@@ -23,12 +45,22 @@ export default function CheckoutPage() {
   const [fulfillment, setFulfillment] = useState<Fulfillment>("pickup");
   const [branch, setBranch] = useState("bandung");
   const [address, setAddress] = useState("");
-  const [payment, setPayment] = useState<Payment>("transfer");
+  const [payment, setPayment] = useState<Payment>(ONLINE_ENABLED ? "online" : "transfer");
   const [note, setNote] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
+
+  // Muat Snap.js sekali bila online aktif.
+  useEffect(() => {
+    if (!ONLINE_ENABLED || document.getElementById("midtrans-snap")) return;
+    const s = document.createElement("script");
+    s.id = "midtrans-snap";
+    s.src = (MIDTRANS_PROD ? "https://app.midtrans.com" : "https://app.sandbox.midtrans.com") + "/snap/snap.js";
+    s.setAttribute("data-client-key", MIDTRANS_CLIENT_KEY!);
+    document.body.appendChild(s);
+  }, []);
 
   const customer = {
     name,
@@ -36,7 +68,7 @@ export default function CheckoutPage() {
     fulfillment,
     branch,
     address,
-    payment: payment === "cod" ? "COD" : "Transfer bank",
+    payment: payment === "online" ? "Bayar online" : "Transfer bank",
     note,
   };
   const waText = cartToWhatsAppText(
@@ -60,9 +92,38 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Gagal memproses pesanan.");
-      } else {
-        setSuccess({ orderNumber: data.orderNumber, subtotal: data.subtotal });
+        return;
+      }
+
+      const done = (paid: SuccessData["paid"]) => {
+        setSuccess({ orderNumber: data.orderNumber, subtotal: data.subtotal, paid });
         clear();
+      };
+
+      if (payment === "online") {
+        // Minta token Snap lalu buka popup pembayaran.
+        const snapRes = await fetch("/api/payments/snap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderNumber: data.orderNumber }),
+        });
+        const snapData = await snapRes.json();
+        if (!snapRes.ok || !snapData.token || !window.snap) {
+          // Pesanan sudah tercatat — fallback ke konfirmasi manual.
+          done("manual");
+          setError(snapData.error ?? "Pembayaran online sedang gangguan — tim kami akan konfirmasi via WhatsApp.");
+          return;
+        }
+        window.snap.pay(snapData.token, {
+          onSuccess: () => done("paid"),
+          onPending: () => done("pending"),
+          onError: () => {
+            done("manual");
+          },
+          onClose: () => done("pending"),
+        });
+      } else {
+        done("manual");
       }
     } catch {
       setError("Tidak dapat terhubung ke server. Coba lewat WhatsApp.");
@@ -76,34 +137,49 @@ export default function CheckoutPage() {
   }
 
   if (success) {
+    const isPaid = success.paid === "paid";
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center border border-indigo bg-indigo-wash text-2xl text-indigo-ink">
-          ✓
-        </div>
-        <h1 className="mt-5 font-display text-3xl font-medium">Pesanan diterima</h1>
-        <p className="mt-3 text-ink-soft">
-          Nomor pesanan kamu:
-          <span className="mt-1 block font-mono text-xl font-medium text-ink">
-            {success.orderNumber}
-          </span>
-        </p>
-        <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-          Total {formatRupiah(success.subtotal)}. Tim kami akan menghubungi via WhatsApp untuk
-          konfirmasi stok & pembayaran. Simpan nomor pesanan ini.
-        </p>
-        <div className="mt-6 flex justify-center gap-2">
-          <Link href="/produk" className="border border-ink px-5 py-2.5 text-sm font-medium hover:bg-ink hover:text-paper">
-            Belanja lagi
-          </Link>
-          <a
-            href={waLink(WA_PRIMARY, `Halo Akapack, konfirmasi pesanan ${success.orderNumber}.`)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-indigo px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
+      <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+        <div className="rounded-2xl border border-line bg-card p-8 text-center shadow-card">
+          <div
+            className={
+              "mx-auto flex h-16 w-16 items-center justify-center rounded-full text-3xl text-white " +
+              (isPaid ? "bg-success" : "bg-indigo")
+            }
           >
-            Konfirmasi via WhatsApp
-          </a>
+            ✓
+          </div>
+          <h1 className="mt-5 text-2xl font-extrabold tracking-tight">
+            {isPaid ? "Pembayaran berhasil!" : "Pesanan diterima"}
+          </h1>
+          <p className="mt-2 text-ink-soft">Nomor pesanan kamu:</p>
+          <div className="mx-auto mt-2 w-fit rounded-lg bg-paper-2 px-4 py-2 font-mono text-lg font-bold">
+            {success.orderNumber}
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            Total <b className="text-ink">{formatRupiah(success.subtotal)}</b>.{" "}
+            {isPaid
+              ? "Pembayaran sudah kami terima dan pesanan langsung diproses. Tim kami akan menghubungi via WhatsApp untuk pengambilan/pengiriman."
+              : success.paid === "pending"
+                ? "Selesaikan pembayaran sesuai instruksi. Status akan terupdate otomatis setelah dana masuk."
+                : "Tim kami akan menghubungi via WhatsApp untuk konfirmasi stok & pembayaran. Simpan nomor pesanan ini."}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <Link
+              href="/produk"
+              className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-ink hover:border-indigo/40 hover:text-indigo-ink"
+            >
+              Belanja lagi
+            </Link>
+            <a
+              href={waLink(WA_PRIMARY, `Halo Akapack, konfirmasi pesanan ${success.orderNumber}.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-success px-5 py-2.5 text-sm font-bold text-white hover:opacity-90"
+            >
+              Konfirmasi via WhatsApp
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -112,48 +188,55 @@ export default function CheckoutPage() {
   if (count === 0) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:px-6">
-        <h1 className="font-display text-3xl font-medium">Keranjang kosong</h1>
-        <Link href="/produk" className="mt-6 inline-block bg-indigo px-6 py-3 text-sm font-medium text-white hover:opacity-90">
-          Lihat katalog
+        <h1 className="text-2xl font-extrabold tracking-tight">Keranjang kosong</h1>
+        <Link
+          href="/produk"
+          className="mt-6 inline-block rounded-full bg-indigo px-7 py-3 text-sm font-bold text-white hover:opacity-90"
+        >
+          Lihat Katalog
         </Link>
       </div>
     );
   }
 
-  const field = "w-full border border-line bg-card px-3 py-2.5 text-sm outline-none focus:border-ink/40";
-  const labelCls = "mb-1.5 block font-mono text-xs uppercase tracking-[0.08em] text-ink-soft";
+  const field =
+    "w-full rounded-lg border border-line bg-card px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-indigo/60";
+  const labelCls = "mb-1.5 block text-xs font-semibold text-ink";
+  const radioCard = (on: boolean) =>
+    "flex cursor-pointer items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors " +
+    (on ? "border-indigo bg-indigo-wash text-indigo-ink" : "border-line bg-card hover:border-indigo/30");
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="font-mono text-xs uppercase tracking-[0.16em] text-ink-soft">Checkout</div>
-      <h1 className="mt-1 font-display text-3xl font-medium tracking-tight sm:text-4xl">Data pemesanan</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Checkout</h1>
+      <p className="mt-1 text-sm text-ink-soft">Lengkapi data di bawah — pesanan langsung masuk ke sistem kami.</p>
 
-      <form onSubmit={submit} className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-        <div className="flex flex-col gap-5">
+      <form onSubmit={submit} className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+        <div className="flex flex-col gap-5 rounded-2xl border border-line bg-card p-5 shadow-card sm:p-6">
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className={labelCls} htmlFor="nama">Nama / nama usaha</label>
+              <label className={labelCls} htmlFor="nama">Nama / nama usaha *</label>
               <input id="nama" required value={name} onChange={(e) => setName(e.target.value)} className={field} />
             </div>
             <div>
-              <label className={labelCls} htmlFor="wa">Nomor WhatsApp</label>
+              <label className={labelCls} htmlFor="wa">Nomor WhatsApp *</label>
               <input id="wa" required value={phone} onChange={(e) => setPhone(e.target.value)} className={field} placeholder="08xx" />
             </div>
           </div>
 
-          {/* Pengambilan */}
+          {/* Pengiriman */}
           <fieldset>
             <span className={labelCls}>Pengiriman</span>
             <div className="grid gap-2 sm:grid-cols-2">
               {([["pickup", "Ambil di cabang"], ["delivery", "Kirim ke alamat"]] as const).map(([val, lbl]) => (
-                <label
-                  key={val}
-                  className={
-                    "flex cursor-pointer items-center gap-2 border px-3 py-2.5 text-sm " +
-                    (fulfillment === val ? "border-ink bg-paper-2" : "border-line bg-card")
-                  }
-                >
-                  <input type="radio" name="fulfillment" checked={fulfillment === val} onChange={() => setFulfillment(val)} />
+                <label key={val} className={radioCard(fulfillment === val)}>
+                  <input
+                    type="radio"
+                    name="fulfillment"
+                    checked={fulfillment === val}
+                    onChange={() => setFulfillment(val)}
+                    className="accent-[#ea580c]"
+                  />
                   {lbl}
                 </label>
               ))}
@@ -171,7 +254,7 @@ export default function CheckoutPage() {
             </div>
           ) : (
             <div>
-              <label className={labelCls} htmlFor="alamat">Alamat pengiriman</label>
+              <label className={labelCls} htmlFor="alamat">Alamat pengiriman *</label>
               <textarea id="alamat" required value={address} onChange={(e) => setAddress(e.target.value)} className={field} rows={3} />
             </div>
           )}
@@ -180,18 +263,39 @@ export default function CheckoutPage() {
           <fieldset>
             <span className={labelCls}>Metode pembayaran</span>
             <div className="grid gap-2">
-              {([["transfer", "Transfer bank"]] as const).map(([val, lbl]) => (
-                <label
-                  key={val}
-                  className={
-                    "flex cursor-pointer items-center gap-2 border px-3 py-2.5 text-sm " +
-                    (payment === val ? "border-ink bg-paper-2" : "border-line bg-card")
-                  }
-                >
-                  <input type="radio" name="payment" checked={payment === val} onChange={() => setPayment(val)} />
-                  {lbl}
+              {ONLINE_ENABLED && (
+                <label className={radioCard(payment === "online")}>
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={payment === "online"}
+                    onChange={() => setPayment("online")}
+                    className="accent-[#ea580c]"
+                  />
+                  <span>
+                    Bayar Online{" "}
+                    <span className="ml-1 rounded-md bg-indigo px-1.5 py-0.5 text-[10px] font-bold text-white">OTOMATIS</span>
+                    <span className="block text-xs font-normal text-ink-soft">
+                      QRIS · Transfer VA semua bank · GoPay/OVO/Dana · Kartu
+                    </span>
+                  </span>
                 </label>
-              ))}
+              )}
+              <label className={radioCard(payment === "transfer")}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={payment === "transfer"}
+                  onChange={() => setPayment("transfer")}
+                  className="accent-[#ea580c]"
+                />
+                <span>
+                  Transfer bank (manual)
+                  <span className="block text-xs font-normal text-ink-soft">
+                    Tim kami kirim nomor rekening & konfirmasi via WhatsApp
+                  </span>
+                </span>
+              </label>
             </div>
           </fieldset>
 
@@ -202,44 +306,48 @@ export default function CheckoutPage() {
         </div>
 
         {/* Ringkasan */}
-        <div className="h-fit border border-line bg-card p-5 lg:sticky lg:top-24">
-          <h2 className="font-mono text-xs uppercase tracking-[0.1em] text-ink-soft">Ringkasan ({count})</h2>
-          <ul className="mt-3 space-y-2 text-sm">
+        <div className="h-fit rounded-2xl border border-line bg-card p-5 shadow-card lg:sticky lg:top-36">
+          <h2 className="text-sm font-bold text-ink">Ringkasan ({count} item)</h2>
+          <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1 text-sm">
             {items.map((it) => (
               <li key={it.id} className="flex justify-between gap-3">
                 <span className="line-clamp-1 text-ink-soft">{it.qty}× {it.name}</span>
-                <span className="shrink-0">{formatRupiah(it.price * it.qty)}</span>
+                <span className="shrink-0 font-medium">{formatRupiah(it.price * it.qty)}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
-            <span className="text-sm text-ink-soft">Subtotal</span>
-            <span className="font-display text-2xl font-medium">{formatRupiah(subtotal)}</span>
+          <div className="mt-4 flex items-baseline justify-between border-t border-dashed border-line pt-4">
+            <span className="text-sm text-ink-soft">Total</span>
+            <span className="text-2xl font-extrabold tracking-tight text-indigo-ink">{formatRupiah(subtotal)}</span>
           </div>
 
           {error && (
-            <p className="mt-4 border border-line bg-paper-2 px-3 py-2 text-xs text-ink">{error}</p>
+            <p className="mt-4 rounded-lg border border-discount/30 bg-discount-wash px-3 py-2 text-xs text-discount">
+              {error}
+            </p>
           )}
 
           <div className="mt-5 flex flex-col gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-indigo px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="w-full rounded-full bg-indigo px-4 py-3.5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {submitting ? "Memproses…" : "Kirim pesanan"}
+              {submitting ? "Memproses…" : payment === "online" ? "Bayar Sekarang" : "Kirim Pesanan"}
             </button>
             <a
               href={waLink(WA_PRIMARY, waText)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 border border-ink px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+              className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-success px-4 py-3 text-sm font-bold text-success transition-colors hover:bg-success hover:text-white"
             >
               Pesan via WhatsApp
             </a>
           </div>
           <p className="mt-3 text-[11px] leading-relaxed text-ink-soft">
-            Harga final & ketersediaan stok dikonfirmasi oleh tim sebelum pembayaran.
+            {payment === "online"
+              ? "Pembayaran diproses aman oleh Midtrans. Pesanan otomatis tercatat setelah dana masuk."
+              : "Harga final & ketersediaan stok dikonfirmasi oleh tim sebelum pembayaran."}
           </p>
         </div>
       </form>
