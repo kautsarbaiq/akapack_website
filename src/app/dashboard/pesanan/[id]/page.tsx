@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { formatRupiah } from "@/lib/format";
 import { orderStatus, ORDER_STATUS } from "@/lib/order-status";
-import { updateOrderStatus } from "../actions";
+import { updateOrderStatus, recordToPos } from "../actions";
 
 const dt = new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short" });
 
@@ -45,6 +45,20 @@ export default async function PesananDetail({
         <span className={"inline-block border px-2 py-0.5 text-xs font-medium " + st.cls}>
           {st.label}
         </span>
+        {order.payment_status === "paid" ? (
+          <span className="inline-block border border-green-300 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">
+            ✓ Lunas{order.paid_via === "midtrans" ? " (online)" : ""}
+          </span>
+        ) : (
+          <span className="inline-block border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+            Belum dibayar
+          </span>
+        )}
+        {order.pos_transaction_id ? (
+          <span className="inline-block border border-blue-300 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-800">
+            ✓ Tercatat di kasir
+          </span>
+        ) : null}
       </div>
       <p className="mt-1 font-mono text-xs text-ink-soft">
         {dt.format(new Date(order.created_at as string))}
@@ -81,7 +95,13 @@ export default async function PesananDetail({
           </div>
           <dl className="mt-3 space-y-1 text-ink-soft">
             <div>Pengiriman: <span className="text-ink">{order.fulfillment === "delivery" ? "Dikirim" : "Ambil di toko"}</span></div>
-            <div>Pembayaran: <span className="text-ink">{order.payment_method === "cod" ? "COD" : "Transfer"}</span></div>
+            <div>
+              Pembayaran:{" "}
+              <span className="text-ink">
+                {order.payment_method === "midtrans" ? "Online (Midtrans)" : "Transfer"}
+                {order.payment_detail ? ` · ${order.payment_detail}` : ""}
+              </span>
+            </div>
             {order.customer_address ? <div>Alamat: <span className="text-ink">{order.customer_address as string}</span></div> : null}
             {order.note ? <div>Catatan: <span className="text-ink">{order.note as string}</span></div> : null}
           </dl>
@@ -107,6 +127,23 @@ export default async function PesananDetail({
               </form>
             ))}
           </div>
+
+          {/* Jembatan ke kasir (POS) */}
+          {!order.pos_transaction_id && (
+            <div className="mt-4 border-t border-line pt-4">
+              <form action={recordToPos}>
+                <input type="hidden" name="id" value={id} />
+                <input type="hidden" name="order_number" value={order.order_number as string} />
+                <button className="bg-ink px-4 py-2 text-xs font-medium text-white hover:opacity-90">
+                  ⚡ Catat ke Kasir (POS)
+                </button>
+              </form>
+              <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
+                Salin pesanan ini ke sistem kasir sebagai penjualan (source: web) & tandai lunas.
+                Pembayaran online tercatat otomatis — tombol ini untuk transfer manual.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
