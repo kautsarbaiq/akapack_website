@@ -36,6 +36,8 @@ export interface ProductQuery {
   categoryIds?: string[] | null;
   search?: string | null;
   sort?: ProductSort;
+  /** Hanya produk yang punya foto (untuk halaman jelajah — sembunyikan yang tanpa gambar). */
+  imageOnly?: boolean;
 }
 
 /** Satu halaman produk aktif, dengan filter kategori + pencarian + sort. */
@@ -49,6 +51,7 @@ export async function fetchProductsPage(
     categoryIds = null,
     search = null,
     sort = "name",
+    imageOnly = false,
   } = query;
 
   // Grup tanpa kategori → langsung kosong (hindari .in() dengan list kosong).
@@ -62,6 +65,7 @@ export async function fetchProductsPage(
     .select(PUBLIC_PRODUCT_COLUMNS, { count: "exact" })
     .eq("is_active", true);
 
+  if (imageOnly) q = q.not("image_url", "is", null).neq("image_url", "");
   if (categoryId) q = q.eq("category_id", categoryId);
   else if (categoryIds && categoryIds.length > 0) q = q.in("category_id", categoryIds);
   if (search && search.trim()) {
@@ -138,22 +142,27 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 
 /**
- * Hitung jumlah produk aktif per kategori (hanya kolom category_id, dipaginasi).
- * Dipakai untuk badge jumlah di beranda & halaman Tentang. Mengembalikan juga total.
+ * Hitung jumlah produk aktif per kategori (dipaginasi). Sekaligus menghitung
+ * versi "berfoto" (punya image_url) agar badge jumlah di halaman jelajah cocok
+ * dengan produk yang benar-benar ditampilkan. `total` = seluruh katalog.
  */
 export async function fetchCategoryCounts(): Promise<{
   byCategory: Map<string, number>;
+  byCategoryWithImage: Map<string, number>;
   total: number;
+  totalWithImage: number;
 }> {
   const supabase = getSupabase();
   const byCategory = new Map<string, number>();
+  const byCategoryWithImage = new Map<string, number>();
   let total = 0;
+  let totalWithImage = 0;
   let from = 0;
 
   for (;;) {
     const { data, error } = await supabase
       .from("products")
-      .select("category_id")
+      .select("category_id,image_url")
       .eq("is_active", true)
       .range(from, from + MAX_RANGE - 1);
     if (error) throw error;
@@ -162,11 +171,16 @@ export async function fetchCategoryCounts(): Promise<{
       total += 1;
       const id = row.category_id as string | null;
       if (id) byCategory.set(id, (byCategory.get(id) ?? 0) + 1);
+      const img = row.image_url as string | null;
+      if (img && img.trim() !== "") {
+        totalWithImage += 1;
+        if (id) byCategoryWithImage.set(id, (byCategoryWithImage.get(id) ?? 0) + 1);
+      }
     }
     if (data.length < MAX_RANGE) break;
     from += MAX_RANGE;
   }
-  return { byCategory, total };
+  return { byCategory, byCategoryWithImage, total, totalWithImage };
 }
 
 export interface GroupSetting {
