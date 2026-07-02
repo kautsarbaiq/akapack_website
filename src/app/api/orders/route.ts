@@ -16,7 +16,7 @@ interface OrderBody {
     fulfillment: "pickup" | "delivery";
     branch?: OutletKey;
     address?: string;
-    payment: "transfer" | "cod";
+    payment: "transfer" | "online" | "cod";
     note?: string;
   };
 }
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     customer_phone: c.phone.trim(),
     customer_address: c.address?.trim() || null,
     fulfillment: c.fulfillment === "delivery" ? "delivery" : "pickup",
-    payment_method: c.payment === "cod" ? "cod" : "transfer",
+    payment_method: c.payment === "online" ? "midtrans" : "transfer",
     note: c.note?.trim() || null,
     subtotal,
     status: "pending",
