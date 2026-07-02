@@ -13,9 +13,9 @@ export function Pagination({ page, pageCount, base }: Props) {
   const next = page < pageCount;
 
   const btn =
-    "border border-line bg-card px-4 py-2 font-mono text-xs transition-colors";
+    "rounded-full border px-5 py-2.5 text-xs font-semibold transition-colors";
   const disabled = "cursor-not-allowed border-line/60 text-ink-soft/50";
-  const enabled = "text-ink hover:border-ink/30";
+  const enabled = "border-line bg-card text-ink hover:border-indigo/40 hover:text-indigo-ink";
 
   return (
     <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Navigasi halaman">
@@ -27,8 +27,8 @@ export function Pagination({ page, pageCount, base }: Props) {
         <span className={`${btn} ${disabled}`}>← Sebelumnya</span>
       )}
 
-      <span className="font-mono text-xs text-ink-soft">
-        Hal <b className="font-medium text-ink">{page}</b> / {pageCount}
+      <span className="rounded-full bg-paper-2 px-4 py-2 text-xs font-medium text-ink-soft">
+        Hal <b className="font-bold text-ink">{page}</b> / {pageCount}
       </span>
 
       {next ? (

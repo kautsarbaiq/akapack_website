@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Category, Product, ProductStock } from "@/lib/types";
-import { displayPrice, formatRupiah, monogram, titleCase } from "@/lib/format";
+import { displayPrice, formatRupiah, titleCase } from "@/lib/format";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { WA_PRIMARY, waLink } from "@/lib/site";
 import { productInquiryText } from "@/lib/wa";
@@ -13,7 +13,6 @@ interface Props {
 }
 
 export function ProductCard({ product, category, stock }: Props) {
-  const color = category?.color || "#ea580c";
   const hasStock = stock && stock.total > 0;
   const hasTiers = product.price_tiers.length > 0;
   const href = `/produk/${product.id}`;
@@ -46,19 +45,18 @@ export function ProductCard({ product, category, stock }: Props) {
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0" style={{ backgroundColor: color }}>
-              <span
-                className="absolute -right-1 top-1 font-display text-[64px] font-bold leading-none"
-                style={{ color: "rgba(255,255,255,0.32)" }}
-                aria-hidden="true"
-              >
-                {monogram(product.name)}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-paper-2">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-ink-soft/40">
+                <path
+                  d="M21 8.2 12 3 3 8.2v7.6L12 21l9-5.2V8.2ZM12 3v9m0 9v-9m9-3.8L12 12 3 8.2"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="px-3 text-center text-[10px] font-medium uppercase tracking-[0.08em] text-ink-soft/60">
+                {category ? titleCase(category.name) : "Foto menyusul"}
               </span>
-              {category && (
-                <span className="absolute bottom-2 left-2 right-2 text-[10px] font-medium uppercase tracking-[0.08em] text-white/90">
-                  {titleCase(category.name)}
-                </span>
-              )}
             </div>
           )}
           {discounted && (

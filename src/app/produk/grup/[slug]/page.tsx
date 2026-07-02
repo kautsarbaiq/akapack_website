@@ -51,7 +51,7 @@ export default async function GrupPage({ params }: { params: Promise<{ slug: str
   const group = groups.find((g) => g.slug === slug);
   const categoryIds = categoryIdsForGroup(categories, slug);
 
-  const result = await fetchProductsPage({ categoryIds, pageSize: 24, sort: "name", imageOnly: true });
+  const result = await fetchProductsPage({ categoryIds, pageSize: 24, sort: "name", photoFirst: true });
   const stock = await fetchStockFor(result.products.map((p) => p.id));
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const fmt = new Intl.NumberFormat("id-ID");

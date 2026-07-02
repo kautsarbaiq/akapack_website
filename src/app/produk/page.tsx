@@ -114,7 +114,7 @@ export default async function ProdukPage({
     categoryIds,
     search: q,
     sort,
-    imageOnly: true, // halaman jelajah: hanya produk berfoto
+    photoFirst: true, // produk berfoto tampil paling depan, sisanya di belakang
   });
   const stock = await fetchStockFor(result.products.map((p) => p.id));
 

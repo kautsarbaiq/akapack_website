@@ -38,6 +38,8 @@ export interface ProductQuery {
   sort?: ProductSort;
   /** Hanya produk yang punya foto (untuk halaman jelajah — sembunyikan yang tanpa gambar). */
   imageOnly?: boolean;
+  /** Produk berfoto tampil duluan, sisanya menyusul di halaman belakang. */
+  photoFirst?: boolean;
 }
 
 /** Satu halaman produk aktif, dengan filter kategori + pencarian + sort. */
@@ -52,6 +54,7 @@ export async function fetchProductsPage(
     search = null,
     sort = "name",
     imageOnly = false,
+    photoFirst = false,
   } = query;
 
   // Grup tanpa kategori → langsung kosong (hindari .in() dengan list kosong).
@@ -60,32 +63,83 @@ export async function fetchProductsPage(
   }
 
   const supabase = getSupabase();
-  let q = supabase
-    .from("products")
-    .select(PUBLIC_PRODUCT_COLUMNS, { count: "exact" })
-    .eq("is_active", true);
 
-  if (imageOnly) q = q.not("image_url", "is", null).neq("image_url", "");
-  if (categoryId) q = q.eq("category_id", categoryId);
-  else if (categoryIds && categoryIds.length > 0) q = q.in("category_id", categoryIds);
-  if (search && search.trim()) {
-    const term = search.trim();
-    // cari di nama / sku / barcode
-    q = q.or(`name.ilike.%${term}%,sku.ilike.%${term}%,barcode.ilike.%${term}%`);
-  }
-
-  if (sort === "price_asc") q = q.order("price", { ascending: true });
-  else if (sort === "price_desc") q = q.order("price", { ascending: false });
-  else q = q.order("name", { ascending: true });
+  // Builder dasar: filter + sort yang sama untuk semua varian kueri.
+  const base = (head: boolean) => {
+    let q = supabase
+      .from("products")
+      .select(PUBLIC_PRODUCT_COLUMNS, { count: "exact", head })
+      .eq("is_active", true);
+    if (imageOnly) q = q.not("image_url", "is", null).neq("image_url", "");
+    if (categoryId) q = q.eq("category_id", categoryId);
+    else if (categoryIds && categoryIds.length > 0) q = q.in("category_id", categoryIds);
+    if (search && search.trim()) {
+      const term = search.trim();
+      // cari di nama / sku / barcode
+      q = q.or(`name.ilike.%${term}%,sku.ilike.%${term}%,barcode.ilike.%${term}%`);
+    }
+    if (sort === "price_asc") q = q.order("price", { ascending: true });
+    else if (sort === "price_desc") q = q.order("price", { ascending: false });
+    else q = q.order("name", { ascending: true });
+    return q;
+  };
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  const { data, error, count } = await q.range(from, to);
-  if (error) throw error;
 
-  const total = count ?? 0;
+  if (!photoFirst) {
+    const { data, error, count } = await base(false).range(from, to);
+    if (error) throw error;
+    const total = count ?? 0;
+    return {
+      products: (data ?? []).map(normalizeProduct),
+      total,
+      page,
+      pageSize,
+      pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    };
+  }
+
+  // photoFirst: produk BERFOTO dulu (urut sesuai sort), lalu tanpa foto —
+  // dijahit dari dua kueri agar paginasi tetap konsisten.
+  const withImg = () => base(false).not("image_url", "is", null).neq("image_url", "");
+  const noImg = () => base(false).or("image_url.is.null,image_url.eq.");
+
+  const { count: cWith, error: e1 } = await base(true)
+    .not("image_url", "is", null)
+    .neq("image_url", "");
+  if (e1) throw e1;
+  const totalWith = cWith ?? 0;
+
+  const { count: cNo, error: e2 } = await base(true).or("image_url.is.null,image_url.eq.");
+  if (e2) throw e2;
+  const totalNo = cNo ?? 0;
+  const total = totalWith + totalNo;
+
+  const rows: Record<string, unknown>[] = [];
+  if (to < totalWith) {
+    // Halaman ini sepenuhnya di zona berfoto.
+    const { data, error } = await withImg().range(from, to);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+  } else if (from >= totalWith) {
+    // Sepenuhnya di zona tanpa foto.
+    const { data, error } = await noImg().range(from - totalWith, to - totalWith);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+  } else {
+    // Halaman transisi: sisa berfoto + awal tanpa foto.
+    const [a, b] = await Promise.all([
+      withImg().range(from, totalWith - 1),
+      noImg().range(0, to - totalWith),
+    ]);
+    if (a.error) throw a.error;
+    if (b.error) throw b.error;
+    rows.push(...(a.data ?? []), ...(b.data ?? []));
+  }
+
   return {
-    products: (data ?? []).map(normalizeProduct),
+    products: rows.map(normalizeProduct),
     total,
     page,
     pageSize,
