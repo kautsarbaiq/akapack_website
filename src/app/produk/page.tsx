@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   fetchCategories,
   fetchProductsPage,
@@ -113,10 +114,16 @@ export default async function ProdukPage({
     categoryIds,
     search: q,
     sort,
+    imageOnly: true, // halaman jelajah: hanya produk berfoto
   });
   const stock = await fetchStockFor(result.products.map((p) => p.id));
 
   const fmt = new Intl.NumberFormat("id-ID");
+  const sideCls = (on: boolean) =>
+    "block rounded-lg px-3 py-2 transition-colors " +
+    (on
+      ? "bg-indigo-wash font-semibold text-indigo-ink"
+      : "text-ink-soft hover:bg-paper-2 hover:text-ink");
 
   const heading = q
     ? `Hasil “${q}”`
@@ -171,46 +178,68 @@ export default async function ProdukPage({
         </p>
       </div>
 
-      {/* Toolbar */}
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchBar initial={q} kategori={kategori} grup={grup} sort={sort} />
-        <SortSelect value={sort} q={q} kategori={kategori} grup={grup} />
-      </div>
+      {/* Layout: sidebar kategori (desktop) + hasil */}
+      <div className="mt-6 gap-8 lg:grid lg:grid-cols-[220px_1fr]">
+        {/* Sidebar kategori (desktop) */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-36 rounded-xl border border-line bg-card p-4">
+            <h2 className="mb-3 text-sm font-bold text-ink">Kategori</h2>
+            <nav className="space-y-0.5 text-sm">
+              <Link href="/produk" className={sideCls(activeGroup === null && !kategori)}>
+                Semua produk
+              </Link>
+              {groups.map((g) => (
+                <Link key={g.slug} href={`/produk?grup=${g.slug}`} className={sideCls(activeGroup === g.slug)}>
+                  {g.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </aside>
 
-      {/* Filter: grup induk → kategori */}
-      <div className="mt-4 border-y border-line py-3">
-        <CategoryNav
-          groups={groups}
-          activeGroup={activeGroup}
-          activeCategoryId={kategori}
-          q={q}
-          sort={sort}
-        />
-      </div>
+        <div className="min-w-0">
+          {/* Toolbar */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <SearchBar initial={q} kategori={kategori} grup={grup} sort={sort} />
+            <SortSelect value={sort} q={q} kategori={kategori} grup={grup} />
+          </div>
 
-      {/* Grid */}
-      {result.products.length === 0 ? (
-        <div className="border border-dashed border-line py-24 text-center">
-          <p className="text-ink-soft">Tidak ada produk yang cocok.</p>
-        </div>
-      ) : (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {result.products.map((p) => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              category={p.category_id ? catMap.get(p.category_id) : null}
-              stock={stock[p.id]}
+          {/* Filter chips (mobile) */}
+          <div className="mt-4 border-y border-line py-3 lg:hidden">
+            <CategoryNav
+              groups={groups}
+              activeGroup={activeGroup}
+              activeCategoryId={kategori}
+              q={q}
+              sort={sort}
             />
-          ))}
-        </div>
-      )}
+          </div>
 
-      <Pagination
-        page={result.page}
-        pageCount={result.pageCount}
-        base={{ q, kategori, grup, sort }}
-      />
+          {/* Grid */}
+          {result.products.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-line py-24 text-center">
+              <p className="text-ink-soft">Tidak ada produk berfoto yang cocok.</p>
+            </div>
+          ) : (
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {result.products.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  category={p.category_id ? catMap.get(p.category_id) : null}
+                  stock={stock[p.id]}
+                />
+              ))}
+            </div>
+          )}
+
+          <Pagination
+            page={result.page}
+            pageCount={result.pageCount}
+            base={{ q, kategori, grup, sort }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

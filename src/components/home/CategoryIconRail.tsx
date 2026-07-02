@@ -20,7 +20,7 @@ export function CategoryIconRail({ items }: { items: IconItem[] }) {
           href={`/produk/grup/${g.slug}`}
           className="group flex flex-col items-center gap-2 text-center"
         >
-          <span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-line bg-paper-2 shadow-card transition-transform group-hover:-translate-y-0.5 group-hover:shadow-card-hover sm:h-[72px] sm:w-[72px]">
+          <span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-line bg-paper-2 shadow-card transition-all group-hover:-translate-y-0.5 group-hover:border-indigo group-hover:shadow-card-hover sm:h-[72px] sm:w-[72px]">
             {g.image ? (
               <Image
                 src={g.image}

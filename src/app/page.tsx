@@ -14,6 +14,7 @@ import { ServiceStrip } from "@/components/home/ServiceStrip";
 import { CategoryIconRail } from "@/components/home/CategoryIconRail";
 import { PromoTiles } from "@/components/home/PromoTiles";
 import { ProductRail } from "@/components/home/ProductRail";
+import { SectionHeader } from "@/components/home/SectionHeader";
 import {
   buildCategoryGroups,
   countByGroup,
@@ -34,7 +35,7 @@ export default async function Home() {
     await Promise.all([
       fetchCategories(),
       fetchCategoryCounts(),
-      fetchProductsPage({ page: 1, pageSize: 24, sort: "name" }),
+      fetchProductsPage({ page: 1, pageSize: 24, sort: "name", imageOnly: true }),
       fetchGroupSettings(),
       fetchProductsWithImages(1500),
       fetchBanners(),
@@ -97,6 +98,9 @@ export default async function Home() {
   ].slice(0, 12);
   const stock = await fetchStockFor(showcase.map((p) => p.id));
   const catMap = new Map(categories.map((c) => [c.id, c]));
+  // Produk terbaru berfoto (urut updated_at) untuk band gelap.
+  const latest = withImages.slice(0, 10);
+  const latestStock = await fetchStockFor(latest.map((p) => p.id));
   const fmt = new Intl.NumberFormat("id-ID");
 
   return (
@@ -143,15 +147,8 @@ export default async function Home() {
       </section>
 
       {/* Belanja per kategori */}
-      <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-lg font-extrabold tracking-tight text-ink sm:text-xl">
-            Belanja per Kategori
-          </h2>
-          <Link href="/produk" className="text-sm font-semibold text-indigo-ink hover:underline">
-            Semua kategori →
-          </Link>
-        </div>
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <SectionHeader title="Belanja per Kategori" href="/produk" hrefLabel="Semua kategori" />
         <CategoryIconRail items={displayGroups} />
       </section>
 
@@ -162,14 +159,7 @@ export default async function Home() {
 
       {/* Rekomendasi */}
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
-        <div className="mb-3 flex items-end justify-between gap-3">
-          <h2 className="text-lg font-extrabold tracking-tight text-ink sm:text-xl">
-            Rekomendasi untukmu
-          </h2>
-          <Link href="/produk" className="shrink-0 text-sm font-semibold text-indigo-ink hover:underline">
-            Lihat semua →
-          </Link>
-        </div>
+        <SectionHeader title="Rekomendasi untukmu" href="/produk" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {showcase.map((p) => (
             <ProductCard
@@ -182,8 +172,24 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Band gelap: produk terbaru */}
+      {latest.length >= 4 && (
+        <section className="mt-12 bg-ink py-10">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <ProductRail
+              title="Produk Terbaru"
+              href="/produk"
+              products={latest}
+              stock={latestStock}
+              catMap={catMap}
+              light
+            />
+          </div>
+        </section>
+      )}
+
       {/* Rail produk per kategori */}
-      <div className="mx-auto mt-10 max-w-6xl space-y-10 px-4 sm:px-6">
+      <div className="mx-auto mt-12 max-w-6xl space-y-10 px-4 sm:px-6">
         {featuredGroups.map((g) => (
           <ProductRail
             key={g.slug}
